@@ -56,7 +56,7 @@ class Base:
     def from_dict(
         cls,
         dct: T_DATA,
-    ) -> "Base":
+    ):
         """
         Construct an instance from dataclass-like data.
         """

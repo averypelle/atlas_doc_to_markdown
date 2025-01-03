@@ -1,9 +1,20 @@
 # -*- coding: utf-8 -*-
+import textwrap
 
 import pytest
 
 from atlas_doc_parser.exc import ParamError
 from atlas_doc_parser.model import (
+    MarkBackGroundColor,
+    MarkCode,
+    MarkEm,
+    MarkLinkAttrs,
+    MarkLink,
+    MarkStrike,
+    MarkStrong,
+    MarkSubSup,
+    MarkTextColor,
+    MarkUnderLine,
     NodeBlockQuote,
     NodeBulletList,
     NodeCodeBlock,
@@ -35,6 +46,162 @@ from atlas_doc_parser.model import (
 from atlas_doc_parser.tests import check_seder
 
 
+class TestMarkBackGroundColor:
+    def test_case_1(self):
+        pass
+
+
+class TestMarkCode:
+    def test_basic_code_mark(self):
+        """Test basic code mark creation and serialization."""
+        data = {"type": "code"}
+        mark = MarkCode.from_dict(data)
+        check_seder(mark)
+
+        # Verify the mark properties
+        assert mark.type == "code"
+        assert mark.to_dict() == data
+
+        # Test markdown conversion
+        assert mark.to_markdown("print('hello')") == "`print('hello')`"
+
+    def test_code_mark_with_special_chars(self):
+        """Test code mark with text containing special characters."""
+        data = {"type": "code"}
+        mark = MarkCode.from_dict(data)
+
+        # Test with backticks in code
+        text_with_backticks = "var x = `template string`"
+        assert mark.to_markdown(text_with_backticks) == "`var x = `template string``"
+
+        # Test with multiple lines
+        multiline_code = "def func():\n    return True"
+        assert mark.to_markdown(multiline_code) == "`def func():\n    return True`"
+
+    def test_empty_code(self):
+        """Test code mark with empty string."""
+        data = {"type": "code"}
+        mark = MarkCode.from_dict(data)
+        assert mark.to_markdown("") == "``"
+
+    def test_code_mark_whitespace(self):
+        """Test code mark with various whitespace scenarios."""
+        data = {"type": "code"}
+        mark = MarkCode.from_dict(data)
+
+        # Test with leading/trailing whitespace
+        assert mark.to_markdown("  code  ") == "`  code  `"
+
+        # Test with tabs
+        assert mark.to_markdown("\tcode\t") == "`\tcode\t`"
+
+        # Test with newlines
+        assert mark.to_markdown("code\nmore code") == "`code\nmore code`"
+
+
+class TestMarkEm:
+    def test_case_1(self):
+        pass
+
+
+class TestMarkLink:
+    def test_case_1(self):
+        """Test basic link creation with title."""
+        data = {
+            "type": "link",
+            "attrs": {"href": "http://atlassian.com", "title": "Atlassian"},
+        }
+        mark = MarkLink.from_dict(data)
+        check_seder(mark)
+
+        assert isinstance(mark.attrs, MarkLinkAttrs)
+        assert mark.to_dict() == data
+        assert mark.to_markdown("Atlassian") == "[Atlassian](http://atlassian.com)"
+
+    def test_case_2(self):
+        """Test link without title."""
+        data = {"type": "link", "attrs": {"href": "http://example.com"}}
+        mark = MarkLink.from_dict(data)
+        check_seder(mark)
+        # When no title is provided, it should use the text content
+        assert mark.to_markdown("Click here") == "[Click here](http://example.com)"
+
+    def test_case_4(self):
+        """Test error handling for missing required attributes."""
+        data = {"type": "link", "attrs": {}}
+        with pytest.raises(ParamError):
+            MarkLink.from_dict(data)
+
+    def test_case_5(self):
+        """Test link with special characters in URL."""
+        data = {
+            "type": "link",
+            "attrs": {
+                "href": "http://example.com/path?param=value&other=123",
+                "title": "Complex URL",
+            },
+        }
+        mark = MarkLink.from_dict(data)
+        check_seder(mark)
+
+        assert (
+            mark.to_markdown("Special Link")
+            == "[Complex URL](http://example.com/path?param=value&other=123)"
+        )
+
+
+class TestMarkStrike:
+    def test_case_1(self):
+        pass
+
+
+class TestMarkStrong:
+    def test_basic_strong_mark(self):
+        """Test basic strong mark creation and markdown conversion."""
+        data = {"type": "strong"}
+        mark = MarkStrong.from_dict(data)
+        check_seder(mark)
+        assert mark.to_markdown("Hello world") == "**Hello world**"
+
+    def test_strong_mark_with_special_chars(self):
+        """Test strong mark with text containing special characters."""
+        data = {"type": "strong"}
+        mark = MarkStrong.from_dict(data)
+        check_seder(mark)
+        special_text = "Hello * World ** !"
+        assert mark.to_markdown(special_text) == f"**{special_text}**"
+
+    def test_strong_mark_empty_text(self):
+        """Test strong mark with empty text."""
+        data = {"type": "strong"}
+        mark = MarkStrong.from_dict(data)
+        check_seder(mark)
+        assert mark.to_markdown("") == "****"
+
+    def test_strong_mark_with_whitespace(self):
+        """Test strong mark with text containing various whitespace."""
+        data = {"type": "strong"}
+        mark = MarkStrong.from_dict(data)
+        check_seder(mark)
+        text_with_spaces = "  Hello  World  "
+        assert mark.to_markdown(text_with_spaces) == f"**{text_with_spaces}**"
+
+
+class TestMarkSubSup:
+    def test_case_1(self):
+        pass
+
+
+class TestMarkTextColor:
+    def test_case_1(self):
+        pass
+
+
+class TestMarkUnderLine:
+    def test_case_1(self):
+        pass
+
+
 # class TestNodeBlockQuote:
 #     def test(self):
 #         pass
@@ -57,108 +224,259 @@ class TestNodeBulletList:
                 }
             ],
         }
+        node: NodeBulletList = NodeBulletList.from_dict(data)
+        node_list_item = node.content[0]
+        assert isinstance(node_list_item, NodeListItem)
+        node_paragraph = node_list_item.content[0]
+        assert isinstance(node_paragraph, NodeParagraph)
+        node_text = node_paragraph.content[0]
+        assert isinstance(node_text, NodeText)
+
+        check_seder(node)
+
+        assert node.to_markdown() == "- Hello world"
+
+    def test_case_2(self):
+        # Test case 2: Bullet list with formatted text (bold, italic, code)
+        data = {
+            "type": "bulletList",
+            "content": [
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": "Bold",
+                                    "marks": [{"type": "strong"}],
+                                },
+                                {"type": "text", "text": " and "},
+                                {
+                                    "type": "text",
+                                    "text": "italic",
+                                    "marks": [{"type": "em"}],
+                                },
+                                {"type": "text", "text": " and "},
+                                {
+                                    "type": "text",
+                                    "text": "code",
+                                    "marks": [{"type": "code"}],
+                                },
+                            ],
+                        }
+                    ],
+                }
+            ],
+        }
         node = NodeBulletList.from_dict(data)
         check_seder(node)
-        # assert node.to_markdown() == "- Hello world"
+        assert node.to_markdown() == "- **Bold** and *italic* and `code`"
 
-        # # Test case 2: Bullet list with formatted text (bold, italic, code)
-        # data = {
-        #     "type": "bulletList",
-        #     "content": [
-        #         {
-        #             "type": "listItem",
-        #             "content": [
-        #                 {
-        #                     "type": "paragraph",
-        #                     "content": [
-        #                         {
-        #                             "type": "text",
-        #                             "text": "Bold",
-        #                             "marks": [{"type": "strong"}]
-        #                         },
-        #                         {
-        #                             "type": "text",
-        #                             "text": " and "
-        #                         },
-        #                         {
-        #                             "type": "text",
-        #                             "text": "italic",
-        #                             "marks": [{"type": "em"}]
-        #                         },
-        #                         {
-        #                             "type": "text",
-        #                             "text": " and "
-        #                         },
-        #                         {
-        #                             "type": "text",
-        #                             "text": "code",
-        #                             "marks": [{"type": "code"}]
-        #                         }
-        #                     ]
-        #                 }
-        #             ]
-        #         }
-        #     ]
-        # }
-        # node = NodeBulletList.from_dict(data)
-        # check_seder(node)
-        # assert node.to_markdown() == "- **Bold** and *italic* and `code`"
-        #
-        # # Test case 3: Multiple bullet points with links and mixed formatting
-        # data = {
-        #     "type": "bulletList",
-        #     "content": [
-        #         {
-        #             "type": "listItem",
-        #             "content": [
-        #                 {
-        #                     "type": "paragraph",
-        #                     "content": [
-        #                         {
-        #                             "type": "text",
-        #                             "text": "Visit ",
-        #                         },
-        #                         {
-        #                             "type": "text",
-        #                             "text": "Atlassian",
-        #                             "marks": [
-        #                                 {
-        #                                     "type": "link",
-        #                                     "attrs": {
-        #                                         "href": "http://atlassian.com",
-        #                                         "title": "Atlassian"
-        #                                     }
-        #                                 }
-        #                             ]
-        #                         }
-        #                     ]
-        #                 }
-        #             ]
-        #         },
-        #         {
-        #             "type": "listItem",
-        #             "content": [
-        #                 {
-        #                     "type": "paragraph",
-        #                     "content": [
-        #                         {
-        #                             "type": "text",
-        #                             "text": "This is ",
-        #                         },
-        #                         {
-        #                             "type": "text",
-        #                             "text": "strikethrough",
-        #                             "marks": [{"type": "strike"}]
-        #                         }
-        #                     ]
-        #                 }
-        #             ]
-        #         }
-        #     ]
-        # }
-        # node = NodeBulletList.from_dict(data)
-        # check_seder(node)
-        # assert node.to_markdown() == "- Visit [Atlassian](http://atlassian.com)\n- This is ~~strikethrough~~"
+    def test_case_3(self):
+        # Test case 3: Multiple bullet points with links and mixed formatting
+        data = {
+            "type": "bulletList",
+            "content": [
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": "Visit ",
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "Atlassian",
+                                    "marks": [
+                                        {
+                                            "type": "link",
+                                            "attrs": {
+                                                "href": "http://atlassian.com",
+                                                "title": "Atlassian",
+                                            },
+                                        }
+                                    ],
+                                },
+                            ],
+                        }
+                    ],
+                },
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": "This is ",
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "strikethrough",
+                                    "marks": [{"type": "strike"}],
+                                },
+                            ],
+                        }
+                    ],
+                },
+            ],
+        }
+        node = NodeBulletList.from_dict(data)
+        check_seder(node)
+        expected = textwrap.dedent(
+            """
+        - Visit [Atlassian](http://atlassian.com)
+        - This is ~~strikethrough~~
+        """
+        ).strip()
+        # print([node.to_markdown().strip()])  # for debug only
+        # print([expected])  # for debug only
+        # print(node.to_markdown().strip())  # for debug only
+        # print(expected)
+        assert node.to_markdown().strip() == expected
+
+    def test_case_4(self):
+        data = {
+            "type": "bulletList",
+            "content": [
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"text": "item 1", "type": "text"}],
+                        }
+                    ],
+                },
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"text": "item 2", "type": "text"}],
+                        },
+                        {
+                            "type": "bulletList",
+                            "content": [
+                                {
+                                    "type": "listItem",
+                                    "content": [
+                                        {
+                                            "type": "paragraph",
+                                            "content": [
+                                                {"text": "item 2.1", "type": "text"}
+                                            ],
+                                        },
+                                        {
+                                            "type": "bulletList",
+                                            "content": [
+                                                {
+                                                    "type": "listItem",
+                                                    "content": [
+                                                        {
+                                                            "type": "paragraph",
+                                                            "content": [
+                                                                {
+                                                                    "text": "item 2.1.1",
+                                                                    "type": "text",
+                                                                }
+                                                            ],
+                                                        }
+                                                    ],
+                                                },
+                                                {
+                                                    "type": "listItem",
+                                                    "content": [
+                                                        {
+                                                            "type": "paragraph",
+                                                            "content": [
+                                                                {
+                                                                    "text": "item 2.1.2",
+                                                                    "type": "text",
+                                                                }
+                                                            ],
+                                                        }
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    "type": "listItem",
+                                    "content": [
+                                        {
+                                            "type": "paragraph",
+                                            "content": [
+                                                {"text": "item 2.2", "type": "text"}
+                                            ],
+                                        },
+                                        {
+                                            "type": "bulletList",
+                                            "content": [
+                                                {
+                                                    "type": "listItem",
+                                                    "content": [
+                                                        {
+                                                            "type": "paragraph",
+                                                            "content": [
+                                                                {
+                                                                    "text": "item 2.2.1",
+                                                                    "type": "text",
+                                                                }
+                                                            ],
+                                                        }
+                                                    ],
+                                                },
+                                                {
+                                                    "type": "listItem",
+                                                    "content": [
+                                                        {
+                                                            "type": "paragraph",
+                                                            "content": [
+                                                                {
+                                                                    "text": "item 2.2.2",
+                                                                    "type": "text",
+                                                                }
+                                                            ],
+                                                        }
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+        node = NodeBulletList.from_dict(data)
+        check_seder(node)
+        expected = textwrap.dedent(
+            """
+        - item 1
+        - item 2
+            - item 2.1
+                - item 2.1.1
+                - item 2.1.2
+            - item 2.2
+                - item 2.2.1
+                - item 2.2.2
+        """
+        ).strip()
+        # print([node.to_markdown().strip()])  # for debug only
+        # print([expected])  # for debug only
+        # print(node.to_markdown().strip())  # for debug only
+        # print(expected)  # for debug only
+        assert node.to_markdown().strip() == expected
 
 
 class TestNodeCodeBlock:
@@ -179,11 +497,55 @@ class TestNodeCodeBlock:
         check_seder(NodeCodeBlock.from_dict(data))
 
 
-# class TestNodeDate:
-#     def test(self):
-#         pass
-#
-#
+class TestNodeDate:
+    def test_basic_date_node(self):
+        """Test basic date node creation and conversion."""
+        # Unix timestamp for 2024-01-01 00:00:00 UTC
+        data = {
+            "type": "date",
+            "attrs": {"timestamp": "1704067200000"},  # Note: ADF uses milliseconds
+        }
+        node = NodeDate.from_dict(data)
+        check_seder(node)
+        assert node.to_markdown() == "2024-01-01"
+
+    def test_missing_timestamp(self):
+        """Test error handling for missing timestamp."""
+        data = {"type": "date", "attrs": {}}
+        with pytest.raises(ParamError):
+            NodeDate.from_dict(data)
+
+    def test_invalid_timestamp_format(self):
+        """Test error handling for invalid timestamp format."""
+        data = {"type": "date", "attrs": {"timestamp": "not-a-timestamp"}}
+        node = NodeDate.from_dict(data)
+        with pytest.raises(ValueError):
+            node.to_markdown()
+
+    def test_timestamp_conversion(self):
+        """Test various timestamp conversions."""
+        test_cases = [
+            # (timestamp in ms, expected date string)
+            ("0", "1970-01-01"),  # Unix epoch
+            ("1704067200000", "2024-01-01"),  # 2024 New Year
+            ("1735689600000", "2025-01-01"),  # 2025 New Year
+        ]
+
+        for timestamp, expected in test_cases:
+            data = {"type": "date", "attrs": {"timestamp": timestamp}}
+            node = NodeDate.from_dict(data)
+            check_seder(node)
+            assert node.to_markdown() == expected
+
+    def test_very_large_timestamp(self):
+        """Test handling of very large timestamps."""
+        # Year 2100 timestamp
+        data = {"type": "date", "attrs": {"timestamp": "4102444800000"}}
+        node = NodeDate.from_dict(data)
+        check_seder(node)
+        assert node.to_markdown() == "2100-01-01"
+
+
 # class TestNodeDoc:
 #     def test(self):
 #         pass
@@ -249,16 +611,190 @@ class TestNodeCodeBlock:
 #         pass
 #
 #
-# class TestNodePanel:
-#     def test(self):
-#         pass
-#
-#
-# class TestNodeParagraph:
-#     def test(self):
-#         pass
-#
-#
+class TestNodePanel:
+    def test_basic_panel(self):
+        """Test basic panel with simple text content."""
+        data = {
+            "type": "panel",
+            "attrs": {"panelType": "info"},
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [{"type": "text", "text": "Hello world"}],
+                }
+            ],
+        }
+        node = NodePanel.from_dict(data)
+        check_seder(node)
+        # Panel should format with indentation and panel type header
+        expected = textwrap.dedent(
+            """
+        > **INFO**
+        > 
+        > Hello world
+        """
+        ).strip()
+        # print([node.to_markdown().strip()])  # for debug only
+        # print([expected])  # for debug only
+        # print(node.to_markdown().strip())  # for debug only
+        # print(expected)  # for debug only
+        assert node.to_markdown().strip() == expected
+
+    def test_panel_with_multiple_content_types(self):
+        """Test panel with multiple allowed content types."""
+        data = {
+            "type": "panel",
+            "attrs": {"panelType": "warning"},
+            "content": [
+                {
+                    "type": "heading",
+                    "attrs": {"level": 2},
+                    "content": [{"type": "text", "text": "Warning Title"}],
+                },
+                {
+                    "type": "bulletList",
+                    "content": [
+                        {
+                            "type": "listItem",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"type": "text", "text": "List item 1"}
+                                    ],
+                                }
+                            ],
+                        }
+                    ],
+                },
+            ],
+        }
+        node = NodePanel.from_dict(data)
+        check_seder(node)
+        expected = textwrap.dedent(
+            """
+        > **WARNING**
+        > 
+        > ## Warning Title
+        > 
+        > - List item 1
+        """
+        ).strip()
+        # print([node.to_markdown().strip()])  # for debug only
+        # print([expected])  # for debug only
+        # print(node.to_markdown().strip())  # for debug only
+        # print(expected)  # for debug only
+        assert node.to_markdown().strip() == expected
+
+
+class TestNodeParagraph:
+    def test_case_1(self):
+        """Test basic paragraph with simple text"""
+        data = {
+            "type": "paragraph",
+            "content": [{"type": "text", "text": "Hello world"}],
+        }
+        node = NodeParagraph.from_dict(data)
+        assert node.to_dict() == data
+
+        check_seder(node)
+
+        assert node.to_markdown().strip() == "Hello world"
+
+    def test_case_2(self):
+        """Test paragraph with no content"""
+        data = {
+            "type": "paragraph",
+        }
+        node = NodeParagraph.from_dict(data)
+        check_seder(node)
+        assert node.to_markdown().strip() == ""
+
+    def test_case_3(self):
+        """Test paragraph with multiple text nodes"""
+        data = {
+            "type": "paragraph",
+            "content": [
+                {"type": "text", "text": "Hello"},
+                {"type": "text", "text": " "},
+                {"type": "text", "text": "world"},
+            ],
+        }
+        node = NodeParagraph.from_dict(data)
+        check_seder(node)
+        assert node.to_markdown().strip() == "Hello world"
+
+    def test_case_4(self):
+        """Test paragraph with formatted text (multiple marks)"""
+        data = {
+            "type": "paragraph",
+            "content": [
+                {"type": "text", "text": "Bold", "marks": [{"type": "strong"}]},
+                {"type": "text", "text": " and "},
+                {"type": "text", "text": "italic", "marks": [{"type": "em"}]},
+            ],
+        }
+        node = NodeParagraph.from_dict(data)
+        check_seder(node)
+        assert node.to_markdown().strip() == "**Bold** and *italic*"
+
+    def test_case_5(self):
+        """Test paragraph with localId attribute"""
+        data = {
+            "type": "paragraph",
+            "attrs": {"localId": "unique-id-123"},
+            "content": [{"type": "text", "text": "Hello world"}],
+        }
+        node = NodeParagraph.from_dict(data)
+        check_seder(node)
+        assert node.to_markdown().strip() == "Hello world"
+        assert node.attrs.localId == "unique-id-123"
+
+    def test_case_7(self):
+        """Test paragraph with emoji and mention"""
+        data = {
+            "type": "paragraph",
+            "content": [
+                {"type": "text", "text": "Hello "},
+                {"type": "emoji", "attrs": {"shortName": ":smile:", "text": "😊"}},
+                {"type": "text", "text": " "},
+                {"type": "mention", "attrs": {"id": "123", "text": "@user"}},
+            ],
+        }
+        node = NodeParagraph.from_dict(data)
+        check_seder(node)
+        # The exact output will depend on how emoji and mention are implemented
+        # in their respective to_markdown() methods
+        assert node.to_markdown().strip() == "Hello 😊 @user"
+
+    def test_case_8(self):
+        """Test paragraph with link"""
+        data = {
+            "type": "paragraph",
+            "content": [
+                {
+                    "type": "text",
+                    "text": "Visit us at ",
+                },
+                {
+                    "type": "text",
+                    "text": "HERE",
+                    "marks": [
+                        {
+                            "type": "link",
+                            "attrs": {
+                                "href": "https://example.com",
+                            },
+                        }
+                    ],
+                },
+            ],
+        }
+        node = NodeParagraph.from_dict(data)
+        check_seder(node)
+        assert node.to_markdown() == "Visit us at [HERE](https://example.com)\n"
+
+
 # class TestNodeRule:
 #     def test(self):
 #         pass

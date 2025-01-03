@@ -2,6 +2,7 @@
 
 import typing as T
 import enum
+import copy
 import textwrap
 import dataclasses
 from datetime import datetime
@@ -14,6 +15,25 @@ from .base import Base, T_DATA, T_DATA_LIKE
 @dataclasses.dataclass
 class BaseMark(Base):
     type: str = dataclasses.field(default_factory=REQ)
+
+    @classmethod
+    def from_dict(
+        cls,
+        dct: T_DATA,
+    ):
+        # print(f"{dct = }")  # for debug only
+        dct = copy.deepcopy(dct)
+        if "attrs" in dct:
+            fields = cls.get_fields()
+            attrs_field = fields["attrs"]
+            dct["attrs"] = attrs_field.type.from_dict(dct["attrs"])
+        return super().from_dict(dct)
+
+    def to_dict(self) -> T_DATA:
+        data = super().to_dict()
+        if "attrs" in data:
+            data["attrs"] = rm_na(**data["attrs"])
+        return data
 
     def to_markdown(self, text: str) -> str:
         return text
@@ -30,9 +50,7 @@ class MarkBackGroundColorAttrs(Base):
 @dataclasses.dataclass
 class MarkBackGroundColor(BaseMark):
     type: str = dataclasses.field(default=TypeEnum.backgroundColor.value)
-    attrs: MarkBackGroundColorAttrs = MarkBackGroundColorAttrs.nested_field(
-        default_factory=NA
-    )
+    attrs: MarkBackGroundColorAttrs = dataclasses.field(default_factory=NA)
 
 
 @dataclasses.dataclass
@@ -63,7 +81,7 @@ class MarkLinkAttrs(Base):
 @dataclasses.dataclass
 class MarkLink(BaseMark):
     type: str = dataclasses.field(default=TypeEnum.link.value)
-    attrs: MarkLinkAttrs = MarkLinkAttrs.nested_field(default_factory=REQ)
+    attrs: MarkLinkAttrs = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self, text: str) -> str:
         if isinstance(self.attrs.title, str):
@@ -97,7 +115,7 @@ class MarkSubSupAttrs(Base):
 @dataclasses.dataclass
 class MarkSubSup(BaseMark):
     type: str = dataclasses.field(default=TypeEnum.subsup.value)
-    attrs: MarkSubSupAttrs = MarkSubSupAttrs.nested_field(default_factory=NA)
+    attrs: MarkSubSupAttrs = dataclasses.field(default_factory=REQ)
 
 
 @dataclasses.dataclass
@@ -108,7 +126,7 @@ class MarkTextColorAttrs(Base):
 @dataclasses.dataclass
 class MarkTextColor(BaseMark):
     type: str = dataclasses.field(default=TypeEnum.textColor.value)
-    attrs: MarkTextColorAttrs = MarkTextColorAttrs.nested_field(default_factory=NA)
+    attrs: MarkTextColorAttrs = dataclasses.field(default_factory=NA)
 
 
 @dataclasses.dataclass
@@ -130,8 +148,11 @@ _mark_type_to_class_mapping = {
 
 
 def parse_mark(dct: T_DATA) -> "T_MARK":
+    # print(f"{dct = }")  # for debug only
     type_ = dct["type"]
-    return _mark_type_to_class_mapping[type_].from_dict(dct)
+    klass = _mark_type_to_class_mapping[type_]
+    # print(f"{klass = }")  # for debug only
+    return klass.from_dict(dct)
 
 
 @dataclasses.dataclass
@@ -141,28 +162,62 @@ class BaseNode(Base):
     @classmethod
     def from_dict(
         cls,
-        dct_or_obj: T_DATA_LIKE,
-    ) -> T.Optional["Base"]:
-        if "content" in dct_or_obj:
-            if isinstance(dct_or_obj["content"], list):
-                # print(f"{dct_or_obj = }")  # for debug only
+        dct: T_DATA,
+        ignore_error: bool = False,
+    ):
+        # print(f"{dct = }")  # for debug only
+        dct = copy.deepcopy(dct)
+
+        if "attrs" in dct:
+            fields = cls.get_fields()
+            attrs_field = fields["attrs"]
+            dct["attrs"] = attrs_field.type.from_dict(dct["attrs"])
+
+        if "content" in dct:
+            if isinstance(dct["content"], list):
                 new_content = list()
-                for d in dct_or_obj["content"]:
-                    print(f"{d = }")  # for debug only
-                    content = parse_node(d)
-                    new_content.append(content)
-                dct_or_obj["content"] = new_content
-        if "marks" in dct_or_obj:
-            if isinstance(dct_or_obj["marks"], list):
-                # print(f"{dct_or_obj = }")  # for debug only
+                for d in dct["content"]:
+                    # print(f"{d = }")  # for debug only
+                    # impl 1. use try except
+                    try:
+                        content = parse_node(d)
+                        new_content.append(content)
+                    except Exception as e:
+                        if ignore_error:
+                            pass
+                        else:
+                            raise e
+                    # impl 2. no try except, for debug only
+                    # content = parse_node(d)
+                    # new_content.append(content)
+
+                dct["content"] = new_content
+
+        if "marks" in dct:
+            if isinstance(dct["marks"], list):
                 new_marks = list()
-                for d in dct_or_obj["marks"]:
+                for d in dct["marks"]:
                     # print(f"{d = }")  # for debug only
                     mark = parse_mark(d)
                     new_marks.append(mark)
-                dct_or_obj["marks"] = new_marks
-        print(f"{dct_or_obj = }")  # for debug only
-        return super().from_dict(dct_or_obj)
+                dct["marks"] = new_marks
+
+        # print(f"{dct = }")  # for debug only
+        return super().from_dict(dct)
+
+    def to_dict(self) -> T_DATA:
+        inst = copy.copy(self)
+        if hasattr(inst, "attrs"):
+            if isinstance(inst.attrs, NA) is False:
+                inst.attrs = inst.attrs.to_dict()
+        if hasattr(inst, "content"):
+            if isinstance(inst.content, NA) is False:
+                inst.content = [c.to_dict() for c in inst.content]
+        if hasattr(inst, "marks"):
+            if isinstance(inst.marks, NA) is False:
+                inst.marks = [m.to_dict() for m in inst.marks]
+        data = dataclasses.asdict(inst)
+        return rm_na(**data)
 
     def to_markdown(self) -> str:
         raise NotImplementedError(
@@ -173,18 +228,27 @@ class BaseNode(Base):
 T_NODE = T.TypeVar("T_NODE", bound=BaseNode)
 
 
-def _content_to_markdown(content: T.Union[T.List["T_NODE"], NA]) -> str:
+def _strip_double_empty_line(text: str, n: int = 3) -> str:
+    for _ in range(n):
+        text = text.replace("\n\n\n", "\n\n")
+    return text
+
+
+def _content_to_markdown(
+    content: T.Union[T.List["T_NODE"], NA],
+    concat: str = "",
+) -> str:
     if isinstance(content, NA):
         return ""
     else:
         lst = list()
         for node in content:
-            print("----- Work on a new node -----")
+            # print("----- Work on a new node -----")
             md = node.to_markdown()
-            print(f"{node = }")
-            print(f"{md = }")
+            # print(f"{node = }")
+            # print(f"{md = }")
             lst.append(md)
-        return "".join(lst)
+        return concat.join(lst)
 
 
 @dataclasses.dataclass
@@ -193,9 +257,13 @@ class NodeBlockQuote(BaseNode):
     content: T.List["T_NODE"] = dataclasses.field(default_factory=NA)
 
     def to_markdown(self) -> str:
-        return textwrap.indent(
-            _content_to_markdown(self.content),
-            prefix=" " * 4,
+        return (
+            textwrap.indent(
+                _strip_double_empty_line(_content_to_markdown(self.content)),
+                prefix="> ",
+                predicate=lambda line: True,
+            )
+            + "\n"
         )
 
 
@@ -204,8 +272,43 @@ class NodeBulletList(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.bulletList.value)
     content: T.List["T_NODE"] = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
-        return f"- {_content_to_markdown(self.content)}"
+    def to_markdown(
+        self,
+        level: int = 0,
+    ) -> str:
+        lines = []
+        indent = "    " * level  # 4 spaces per level
+
+        for item in self.content:
+            if isinstance(item, NodeListItem):
+                # Process the list item content
+                content_lines = []
+                for node in item.content:
+                    if isinstance(node, NodeBulletList):
+                        # Nested list - increase level
+                        content_lines.append(node.to_markdown(level=level + 1))
+                    else:
+                        # Regular content (like paragraph)
+                        content_lines.append(node.to_markdown().rstrip())
+
+                # Join the content lines
+                item_content = "\n".join(content_lines)
+
+                # Format the first line with bullet point
+                bullet_content = item_content.split("\n")[0]
+                first_line = f"{indent}- {bullet_content}"
+                lines.append(first_line)
+
+                # Add remaining lines
+                remaining_lines = item_content.split("\n")[1:]
+                if remaining_lines:
+                    lines.extend(remaining_lines)
+
+        return "\n".join(lines)
+        # the text of c.to_markdown() may have new line character (if it is a paragraph)
+        # for bullet list, we need to remove the new line character
+        # lines = [f"- {c.to_markdown().rstrip()}" for c in self.content]
+        # return "\n".join(lines)
 
 
 @dataclasses.dataclass
@@ -219,8 +322,8 @@ _atlassian_lang_to_markdown_lang_mapping = {}
 @dataclasses.dataclass
 class NodeCodeBlock(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.codeBlock.value)
-    attrs: NodeCodeBlockAttrs = NodeCodeBlockAttrs.nested_field(default_factory=NA)
-    content: T.List["T_NODE"] = dataclasses.field(default=NA)
+    attrs: NodeCodeBlockAttrs = dataclasses.field(default_factory=NA)
+    content: T.List["T_NODE"] = dataclasses.field(default_factory=NA)
 
     def to_markdown(self) -> str:
         code = _content_to_markdown(self.content)
@@ -242,7 +345,7 @@ class NodeDateAttrs(Base):
 @dataclasses.dataclass
 class NodeDate(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.date.value)
-    attrs: NodeDateAttrs = NodeDateAttrs.nested_field(default_factory=REQ)
+    attrs: NodeDateAttrs = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self) -> str:
         return str(datetime.utcfromtimestamp(int(self.attrs.timestamp) / 1000).date())
@@ -255,7 +358,11 @@ class NodeDoc(BaseNode):
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
-        return _content_to_markdown(self.content)
+        # for doc, we need to have a new line at the end and ensure there is no empty line at the beginning
+        md = _content_to_markdown(self.content, concat="\n").strip() + "\n"
+        for _ in range(3):
+            md = md.replace("\n\n\n", "\n\n")
+        return md
 
 
 @dataclasses.dataclass
@@ -268,7 +375,7 @@ class NodeEmojiAttrs(Base):
 @dataclasses.dataclass
 class NodeEmoji(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.emoji.value)
-    attrs: NodeEmojiAttrs = NodeEmojiAttrs.nested_field(default_factory=REQ)
+    attrs: NodeEmojiAttrs = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self) -> str:
         if isinstance(self.attrs.text, str):
@@ -285,7 +392,7 @@ class NodeExpandAttrs(Base):
 @dataclasses.dataclass
 class NodeExpand(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.expand.value)
-    attrs: NodeExpandAttrs = NodeExpandAttrs.nested_field(default_factory=REQ)
+    attrs: NodeExpandAttrs = dataclasses.field(default_factory=REQ)
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
     marks: T.List["T_MARK"] = dataclasses.field(default=NA)
 
@@ -307,11 +414,22 @@ class NodeHeadingAttrs(Base):
 @dataclasses.dataclass
 class NodeHeading(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.heading.value)
-    attrs: NodeHeadingAttrs = NodeHeadingAttrs.nested_field(default_factory=REQ)
+    attrs: NodeHeadingAttrs = dataclasses.field(default_factory=REQ)
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
-        return "#" * self.attrs.level + " " + _content_to_markdown(self.content)
+        """
+        For heading, we would like to have an empty line before and after the heading.
+        """
+        md = (
+            "\n\n"
+            + "{} {}".format(
+                "#" * self.attrs.level,
+                _content_to_markdown(self.content),
+            )
+            + "\n\n"
+        )
+        return md
 
 
 @dataclasses.dataclass
@@ -322,7 +440,7 @@ class NodeInlineCardAttrs(Base):
 @dataclasses.dataclass
 class NodeInlineCard(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.inlineCard.value)
-    attrs: NodeInlineCardAttrs = NodeInlineCardAttrs.nested_field(default_factory=REQ)
+    attrs: NodeInlineCardAttrs = dataclasses.field(default_factory=REQ)
 
 
 @dataclasses.dataclass
@@ -331,7 +449,7 @@ class NodeListItem(BaseNode):
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
-        return f"- {_content_to_markdown(self.content)}"
+        return _content_to_markdown(self.content)
 
 
 @dataclasses.dataclass
@@ -347,8 +465,11 @@ class NodeMediaAttrs(Base):
 @dataclasses.dataclass
 class NodeMedia(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.media.value)
-    attrs: NodeMediaAttrs = NodeMediaAttrs.nested_field(default_factory=REQ)
+    attrs: NodeMediaAttrs = dataclasses.field(default_factory=REQ)
     marks: T.List["T_MARK"] = dataclasses.field(default=NA)
+
+    def to_markdown(self) -> str:
+        return ""
 
 
 @dataclasses.dataclass
@@ -356,18 +477,21 @@ class NodeMediaGroup(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.mediaGroup.value)
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
 
+    def to_markdown(self) -> str:
+        return ""
+
 
 @dataclasses.dataclass
 class NodeMediaSingleAttrs(Base):
     layout: str = dataclasses.field(default_factory=REQ)
-    width: int = dataclasses.field(default_factory=NA)
+    width: float = dataclasses.field(default_factory=NA)
     widthType: str = dataclasses.field(default_factory=NA)
 
 
 @dataclasses.dataclass
 class NodeMediaSingle(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.mediaSingle.value)
-    attrs: NodeMediaSingleAttrs = NodeMediaSingleAttrs.nested_field(default_factory=REQ)
+    attrs: NodeMediaSingleAttrs = dataclasses.field(default_factory=REQ)
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
@@ -385,7 +509,13 @@ class NodeMentionAttrs(Base):
 @dataclasses.dataclass
 class NodeMention(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.mention.value)
-    attrs: NodeMentionAttrs = NodeMentionAttrs.nested_field(default_factory=REQ)
+    attrs: NodeMentionAttrs = dataclasses.field(default_factory=REQ)
+
+    def to_markdown(self) -> str:
+        if isinstance(self.attrs.text, NA):
+            return "@Unknown"
+        else:
+            return self.attrs.text
 
 
 @dataclasses.dataclass
@@ -396,9 +526,7 @@ class NodeNestedExpandAttrs(Base):
 @dataclasses.dataclass
 class NodeNestedExpand(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.nestedExpand.value)
-    attrs: NodeNestedExpandAttrs = NodeNestedExpandAttrs.nested_field(
-        default_factory=NA
-    )
+    attrs: NodeNestedExpandAttrs = dataclasses.field(default_factory=NA)
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
 
 
@@ -410,7 +538,7 @@ class NodeOrderedListAttrs(Base):
 @dataclasses.dataclass
 class NodeOrderedList(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.orderedList.value)
-    attrs: NodeOrderedListAttrs = NodeOrderedListAttrs.nested_field(default_factory=NA)
+    attrs: NodeOrderedListAttrs = dataclasses.field(default_factory=NA)
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
@@ -423,25 +551,31 @@ class NodeOrderedList(BaseNode):
 
 @dataclasses.dataclass
 class NodePanelAttrs(Base):
-    panelType: int = dataclasses.field(default_factory=REQ)
+    panelType: str = dataclasses.field(default_factory=REQ)
 
 
 @dataclasses.dataclass
 class NodePanel(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.panel.value)
-    attrs: NodePanelAttrs = NodePanelAttrs.nested_field(default_factory=REQ)
+    attrs: NodePanelAttrs = dataclasses.field(default_factory=REQ)
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
-        return textwrap.indent(
-            "\n".join(
-                [
-                    f"**{self.attrs.panelType}**",
-                    "",
-                    _content_to_markdown(self.content),
-                ]
-            ),
-            prefix=" " * 4,
+        return (
+            textwrap.indent(
+                _strip_double_empty_line(
+                    "\n".join(
+                        [
+                            f"**{self.attrs.panelType.upper()}**",
+                            "",
+                            _content_to_markdown(self.content),
+                        ]
+                    )
+                ),
+                prefix="> ",
+                predicate=lambda line: True,
+            )
+            + "\n"
         )
 
 
@@ -453,11 +587,11 @@ class NodeParagraphAttrs(Base):
 @dataclasses.dataclass
 class NodeParagraph(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.paragraph.value)
-    attrs: NodeParagraphAttrs = NodeParagraphAttrs.nested_field(default_factory=NA)
-    content: T.List["T_NODE"] = dataclasses.field(default=NA)
+    attrs: NodeParagraphAttrs = dataclasses.field(default_factory=NA)
+    content: T.List["T_NODE"] = dataclasses.field(default_factory=NA)
 
     def to_markdown(self) -> str:
-        return _content_to_markdown(self.content)
+        return _content_to_markdown(self.content) + "\n"
 
 
 @dataclasses.dataclass
@@ -478,7 +612,7 @@ class NodeStatusAttrs(Base):
 @dataclasses.dataclass
 class NodeStatus(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.status.value)
-    attrs: NodeStatusAttrs = NodeStatusAttrs.nested_field(default_factory=REQ)
+    attrs: NodeStatusAttrs = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self) -> str:
         return f"`{self.attrs.text}`"
@@ -548,11 +682,9 @@ _node_type_to_class_mapping = {
 }
 
 
-def parse_node(dct_or_obj: T_DATA_LIKE) -> "T_NODE":
-    if isinstance(dct_or_obj, dict) is False:
-        return dct_or_obj
-    # print(f"{dct_or_obj = }")  # for debug only
-    type_ = dct_or_obj["type"]
+def parse_node(dct: T_DATA) -> "T_NODE":
+    # print(f"{dct = }")  # for debug only
+    type_ = dct["type"]
     klass = _node_type_to_class_mapping[type_]
     # print(f"{klass = }")  # for debug only
-    return klass.from_dict(dct_or_obj)
+    return klass.from_dict(dct)

@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""
+This script is used to extract Atlassian Document Format content from Confluence.
+"""
+
 import json
 import time
 import shutil
 from pathlib import Path
-from rich import print as rprint
 from pyatlassian.api import confluence
 
 dir_here = Path(__file__).absolute().parent
@@ -21,6 +24,9 @@ conf = confluence.Confluence(
 
 
 def get_page_by_id(page_id: int) -> tuple[str, dict]:
+    """
+    Get page title and body (atlas_doc_format) by page_id.
+    """
     res = conf.get_page_by_id(
         page_id=page_id,
         body_format="atlas_doc_format",
@@ -39,6 +45,9 @@ def get_page_by_id(page_id: int) -> tuple[str, dict]:
 
 
 def main(page_id_list: list[int]):
+    """
+    Convert page content to json file and save to disk.
+    """
     if dir_tmp.exists():
         shutil.rmtree(dir_tmp)
     dir_tmp.mkdir()
@@ -52,5 +61,6 @@ def main(page_id_list: list[int]):
 if __name__ == "__main__":
     id_list = [
         294223873,  # page_id = '294223873', page_title = 'Atlassian Document Format Parser Test', page_url = 'https://sanhehu.atlassian.net/wiki/spaces/JWBMT/pages/294223873/Atlassian+Document+Format+Parser+Test'
+        293077005,  # page_id = '293077005', page_title = 'Welcome to BunnymanTech LLC: Our Story and Mission', page_url = 'https://sanhehu.atlassian.net/wiki/spaces/JWBMT/pages/293077005/Welcome+to+BunnymanTech+LLC+Our+Story+and+Mission'
     ]
     main(id_list)
