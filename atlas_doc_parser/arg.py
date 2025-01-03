@@ -5,7 +5,6 @@ Argument manipulation utilities.
 """
 
 import typing as T
-import dataclasses
 
 
 class REQ:
@@ -29,3 +28,7 @@ def rm_na(**kwargs) -> T_KWARGS:
     return {
         key: value for key, value in kwargs.items() if isinstance(value, NA) is False
     }
+
+
+if __name__ == "__main__":
+    pass
