@@ -1,0 +1,1119 @@
+/Users/sanhehu/Documents/GitHub/atlas_doc_parser-project/.venv/bin/python /Users/sanhehu/Documents/GitHub/atlas_doc_parser-project/scripts/crawl_document/crawl_document.py
+<div class="sc-cBrjTV crKIBs">
+ <h1 id="atlassian-document-format">
+  Atlassian Document Format
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1afrefi">
+     .css-1afrefi{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:24px;height:24px;}.css-1afrefi >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1afrefi >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1afrefi >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1afrefi >svg{width:24px;height:24px;}
+    </style>
+    <span aria-label="copy" class="css-1afrefi" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h1>
+ <div class="sc-lffWgi iLIKSx">
+  <div class="sc-fGSyRc eysgIS" width="192">
+   <div class="sc-jkPxnQ cLWHVF">
+   </div>
+  </div>
+ </div>
+ <h2 id="purpose">
+  Purpose
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1afrefi">
+     .css-1afrefi{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:24px;height:24px;}.css-1afrefi >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1afrefi >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1afrefi >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1afrefi >svg{width:24px;height:24px;}
+    </style>
+    <span aria-label="copy" class="css-1afrefi" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h2>
+ <p>
+  The Atlassian Document Format (ADF) represents rich text stored in Atlassian products. For example,
+in Jira Cloud platform, the text in issue comments and in
+  <span class="sc-jdeSqf cQNBrn">
+   <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+    <code>
+     textarea
+    </code>
+   </span>
+  </span>
+  custom fields is stored as ADF.
+ </p>
+ <h2 id="json-schema">
+  JSON schema
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1afrefi">
+     .css-1afrefi{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:24px;height:24px;}.css-1afrefi >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1afrefi >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1afrefi >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1afrefi >svg{width:24px;height:24px;}
+    </style>
+    <span aria-label="copy" class="css-1afrefi" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h2>
+ <p>
+  An Atlassian Document Format document is a JSON object. A JSON schema is available to validate
+documents. This JSON schema is found at
+  <a href="http://go.atlassian.com/adf-json-schema" target="_blank">
+   http://go.atlassian.com/adf-json-schema
+   <style data-emotion="css 1wits42">
+    .css-1wits42{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:16px;height:16px;}.css-1wits42 >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1wits42 >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1wits42 >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1wits42 >svg{width:16px;height:16px;}
+   </style>
+   <span aria-label="Follow" class="css-1wits42" role="img" style="--icon-primary-color:currentColor;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+    <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+     <g fill="currentColor" fill-rule="evenodd">
+      <path d="M11.031 7A1.03 1.03 0 0010 8.036a1.05 1.05 0 001.044 1.045l3.121.014.014 3.121a1.05 1.05 0 001.045 1.044 1.03 1.03 0 001.036-1.035l-.019-4.161a1.053 1.053 0 00-1.045-1.045L11.035 7h-.004z">
+      </path>
+      <path d="M13.364 8.292l-7.072 7.071a1.002 1.002 0 000 1.415c.39.39 1.024.39 1.415 0l7.071-7.071A1.002 1.002 0 0014.071 8a1 1 0 00-.707.292z">
+      </path>
+     </g>
+    </svg>
+   </span>
+  </a>
+  .
+ </p>
+ <div class="sc-hkaZBZ bsbZCT">
+  <section class="sc-giOsra cEicjz">
+   <div class="sc-jOVcOr ccUuQb">
+    <style data-emotion="css snhnyn">
+     .css-snhnyn{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;}.css-snhnyn &gt;svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-snhnyn &gt;svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-snhnyn &gt;svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}
+    </style>
+    <span aria-hidden="true" class="css-snhnyn" style="--icon-primary-color:#0747A6;--icon-secondary-color:#DEEBFF">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill-rule="evenodd">
+       <path d="M2 12c0 5.523 4.477 10 10 10s10-4.477 10-10S17.523 2 12 2 2 6.477 2 12z" fill="currentColor">
+       </path>
+       <rect fill="inherit" height="7" rx="1" width="2" x="11" y="10">
+       </rect>
+       <circle cx="12" cy="8" fill="inherit" r="1">
+       </circle>
+      </g>
+     </svg>
+    </span>
+   </div>
+   <div class="sc-SFOxd KLVHW">
+    <div class="sc-dzOgQY RfwMt">
+     <p>
+      Marks and nodes included in the JSON schema may not be valid in this implementation. Refer to this
+documentation for details of supported marks and nodes.
+     </p>
+    </div>
+   </div>
+  </section>
+ </div>
+ <h2 id="json-structure">
+  JSON structure
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1afrefi">
+     .css-1afrefi{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:24px;height:24px;}.css-1afrefi >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1afrefi >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1afrefi >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1afrefi >svg{width:24px;height:24px;}
+    </style>
+    <span aria-label="copy" class="css-1afrefi" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h2>
+ <p>
+  An ADF document is composed of a hierarchy of
+  <em>
+   nodes
+  </em>
+  . There are two categories of nodes: block and
+inline. Block nodes define the structural elements of the document such as headings, paragraphs,
+lists, and alike. Inline nodes contain the document content such as text and images. Some of these
+nodes can take
+  <em>
+   marks
+  </em>
+  that define text formatting or embellishment such as centered, bold, italics,
+and alike.
+ </p>
+ <p>
+  To center text: add a mark of the type alignment with an attribute
+  <span class="sc-jdeSqf cQNBrn">
+   <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+    <code>
+     align
+    </code>
+   </span>
+  </span>
+  and the value
+  <span class="sc-jdeSqf cQNBrn">
+   <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+    <code>
+     center
+    </code>
+   </span>
+  </span>
+  .
+ </p>
+ <p>
+  A document is
+  <em>
+   ordered
+  </em>
+  , that is, there's a single sequential path through it: traversing a document
+in sequence and concatenating the nodes yields content in the correct order.
+ </p>
+ <p>
+  For example:
+ </p>
+ <pre><div class="sc-jGxEUC jCVVco"><div class="sc-cZBZkQ fypsmc"><div class="sc-gbzWSY jgxetf"><div class="sc-jqIZGH vudGk"><pre>1
+2</pre><pre><code class="json">{
+  "version": 1,
+  "type": "doc",
+  "content": [
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Hello "
+        },
+        {
+          "type": "text",
+          "text": "world",
+          "marks": [
+            {
+              "type": "strong"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+</code></pre></div></div></div></div></pre>
+ <p>
+  Result in the text "Hello
+  <strong>
+   world
+  </strong>
+  ".
+ </p>
+ <h2 id="nodes">
+  Nodes
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1afrefi">
+     .css-1afrefi{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:24px;height:24px;}.css-1afrefi >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1afrefi >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1afrefi >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1afrefi >svg{width:24px;height:24px;}
+    </style>
+    <span aria-label="copy" class="css-1afrefi" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h2>
+ <p>
+  Nodes have the following common properties:
+ </p>
+ <div class="sc-jdfcpN jMPRQO">
+  <table node="[object Object]">
+   <thead class="sc-eNNmBn igxxMf">
+    <tr class="sc-eEieub jPqTBr">
+     <th class="sc-kNBZmU lhcjXP">
+      Property
+     </th>
+     <th class="sc-kNBZmU lhcjXP">
+      Required
+     </th>
+     <th class="sc-kNBZmU lhcjXP">
+      Description
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr class="sc-eEieub jPqTBr">
+     <td class="sc-eopZyb gzVyrk">
+      type
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      â
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      Defines the type of block node such as
+      <span class="sc-jdeSqf cQNBrn">
+       <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+        <code>
+         paragraph
+        </code>
+       </span>
+      </span>
+      ,
+      <span class="sc-jdeSqf cQNBrn">
+       <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+        <code>
+         table
+        </code>
+       </span>
+      </span>
+      , and alike.
+     </td>
+    </tr>
+    <tr class="sc-eEieub jPqTBr">
+     <td class="sc-eopZyb gzVyrk">
+      content
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      â in block nodes, not applicable in inline nodes
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      An array contaning inline and block nodes that define the content of a section of the document.
+     </td>
+    </tr>
+    <tr class="sc-eEieub jPqTBr">
+     <td class="sc-eopZyb gzVyrk">
+      version
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      â in the root, otherwise not applicable
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      Defines the version of ADF used in this representation.
+     </td>
+    </tr>
+    <tr class="sc-eEieub jPqTBr">
+     <td class="sc-eopZyb gzVyrk">
+      marks
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      Defines text decoration or formatting.
+     </td>
+    </tr>
+    <tr class="sc-eEieub jPqTBr">
+     <td class="sc-eopZyb gzVyrk">
+      attrs
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      Further information defining attributes of the block such as the language represented in a block of code.
+     </td>
+    </tr>
+   </tbody>
+  </table>
+ </div>
+ <h3 id="block-nodes">
+  Block nodes
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1afrefi">
+     .css-1afrefi{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:24px;height:24px;}.css-1afrefi >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1afrefi >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1afrefi >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1afrefi >svg{width:24px;height:24px;}
+    </style>
+    <span aria-label="copy" class="css-1afrefi" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h3>
+ <p>
+  Block nodes can be subdivided into:
+ </p>
+ <ul>
+  <li>
+   the root (
+   <span class="sc-jdeSqf cQNBrn">
+    <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+     <code>
+      doc
+     </code>
+    </span>
+   </span>
+   ) node.
+  </li>
+  <li>
+   top level nodes, nodes that can be placed directly below the root node.
+  </li>
+  <li>
+   child nodes, nodes that have to be the child of a higher-level mode.
+  </li>
+ </ul>
+ <p>
+  Some top-level nodes can be used as child nodes. For example, the
+  <span class="sc-jdeSqf cQNBrn">
+   <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+    <code>
+     paragraph
+    </code>
+   </span>
+  </span>
+  node can be used at the
+top level or embedded within a list or table.
+ </p>
+ <h4 id="root-block-node">
+  Root block node
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1wits42">
+     .css-1wits42{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:16px;height:16px;}.css-1wits42 >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1wits42 >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1wits42 >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1wits42 >svg{width:16px;height:16px;}
+    </style>
+    <span aria-label="copy" class="css-1wits42" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h4>
+ <p>
+  Every document starts with a root
+  <a href="/cloud/jira/platform/apis/document/nodes/doc" target="_self">
+   <span class="sc-jdeSqf cQNBrn">
+    <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+     <code>
+      doc
+     </code>
+    </span>
+   </span>
+  </a>
+  node. This
+node contains the
+  <span class="sc-jdeSqf cQNBrn">
+   <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+    <code>
+     version
+    </code>
+   </span>
+  </span>
+  and
+  <span class="sc-jdeSqf cQNBrn">
+   <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+    <code>
+     content
+    </code>
+   </span>
+  </span>
+  properties. The simplest document in ADF is this root node
+with no content:
+ </p>
+ <pre><div class="sc-jGxEUC jCVVco"><div class="sc-cZBZkQ fypsmc"><div class="sc-gbzWSY jgxetf"><div class="sc-jqIZGH vudGk"><pre>1
+2</pre><pre><code class="json">{
+  "version": 1,
+  "type": "doc",
+  "content": []
+}
+</code></pre></div></div></div></div></pre>
+ <h3 id="top-level-block-nodes">
+  Top-level block nodes
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1afrefi">
+     .css-1afrefi{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:24px;height:24px;}.css-1afrefi >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1afrefi >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1afrefi >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1afrefi >svg{width:24px;height:24px;}
+    </style>
+    <span aria-label="copy" class="css-1afrefi" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h3>
+ <p>
+  The top-level block nodes include:
+ </p>
+ <ul>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/blockquote" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       blockquote
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/bulletList" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       bulletList
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/codeBlock" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       codeBlock
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/expand" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       expand
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/heading" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       heading
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/mediaGroup" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       mediaGroup
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/mediaSingle" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       mediaSingle
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/orderedList" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       orderedList
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/panel" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       panel
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/paragraph" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       paragraph
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/rule" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       rule
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/table" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       table
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/multiBodiedExtension" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       multiBodiedExtension
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+ </ul>
+ <h3 id="child-block-nodes">
+  Child block nodes
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1afrefi">
+     .css-1afrefi{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:24px;height:24px;}.css-1afrefi >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1afrefi >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1afrefi >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1afrefi >svg{width:24px;height:24px;}
+    </style>
+    <span aria-label="copy" class="css-1afrefi" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h3>
+ <p>
+  The child block nodes include:
+ </p>
+ <ul>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/listItem" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       listItem
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/media" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       media
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/nestedExpand" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       nestedExpand
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/table_cell" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       tableCell
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/table_header" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       tableHeader
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/table_row" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       tableRow
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/extensionFrame" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       extensionFrame
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+ </ul>
+ <h2 id="inline-nodes">
+  Inline nodes
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1afrefi">
+     .css-1afrefi{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:24px;height:24px;}.css-1afrefi >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1afrefi >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1afrefi >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1afrefi >svg{width:24px;height:24px;}
+    </style>
+    <span aria-label="copy" class="css-1afrefi" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h2>
+ <p>
+  The inline nodes include:
+ </p>
+ <ul>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/date" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       date
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/emoji" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       emoji
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/hardBreak" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       hardBreak
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/inlineCard" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       inlineCard
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/mention" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       mention
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/status" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       status
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/text" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       text
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/nodes/mediaInline" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       mediaInline
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+ </ul>
+ <h1 id="marks">
+  Marks
+  <span class="heading-anchor-wrapper" role="presentation">
+   <button class="sc-iCwjlJ bIjwqY">
+    <style data-emotion="css 1afrefi">
+     .css-1afrefi{display:inline-block;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;line-height:1;width:24px;height:24px;}.css-1afrefi >svg{overflow:hidden;pointer-events:none;max-width:100%;max-height:100%;color:var(--icon-primary-color);fill:var(--icon-secondary-color);vertical-align:bottom;}.css-1afrefi >svg stop{stop-color:currentColor;}@media screen and (forced-colors: active){.css-1afrefi >svg{-webkit-filter:grayscale(1);filter:grayscale(1);--icon-primary-color:CanvasText;--icon-secondary-color:Canvas;}}.css-1afrefi >svg{width:24px;height:24px;}
+    </style>
+    <span aria-label="copy" class="css-1afrefi" role="img" style="--icon-primary-color:#6B778C;--icon-secondary-color:var(--ds-surface, #FFFFFF)">
+     <svg height="24" role="presentation" viewbox="0 0 24 24" width="24">
+      <g fill="currentColor" fill-rule="evenodd">
+       <path d="M12.856 5.457l-.937.92a1.002 1.002 0 000 1.437 1.047 1.047 0 001.463 0l.984-.966c.967-.95 2.542-1.135 3.602-.288a2.54 2.54 0 01.203 3.81l-2.903 2.852a2.646 2.646 0 01-3.696 0l-1.11-1.09L9 13.57l1.108 1.089c1.822 1.788 4.802 1.788 6.622 0l2.905-2.852a4.558 4.558 0 00-.357-6.82c-1.893-1.517-4.695-1.226-6.422.47">
+       </path>
+       <path d="M11.144 19.543l.937-.92a1.002 1.002 0 000-1.437 1.047 1.047 0 00-1.462 0l-.985.966c-.967.95-2.542 1.135-3.602.288a2.54 2.54 0 01-.203-3.81l2.903-2.852a2.646 2.646 0 013.696 0l1.11 1.09L15 11.43l-1.108-1.089c-1.822-1.788-4.802-1.788-6.622 0l-2.905 2.852a4.558 4.558 0 00.357 6.82c1.893 1.517 4.695 1.226 6.422-.47">
+       </path>
+      </g>
+     </svg>
+    </span>
+   </button>
+  </span>
+ </h1>
+ <p>
+  Mark have the following properties:
+ </p>
+ <div class="sc-jdfcpN jMPRQO">
+  <table node="[object Object]">
+   <thead class="sc-eNNmBn igxxMf">
+    <tr class="sc-eEieub jPqTBr">
+     <th class="sc-kNBZmU lhcjXP">
+      Property
+     </th>
+     <th class="sc-kNBZmU lhcjXP">
+      Required
+     </th>
+     <th class="sc-kNBZmU lhcjXP">
+      Description
+     </th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr class="sc-eEieub jPqTBr">
+     <td class="sc-eopZyb gzVyrk">
+      type
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      â
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      Defines the type of mark such as
+      <span class="sc-jdeSqf cQNBrn">
+       <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+        <code>
+         code
+        </code>
+       </span>
+      </span>
+      ,
+      <span class="sc-jdeSqf cQNBrn">
+       <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+        <code>
+         link
+        </code>
+       </span>
+      </span>
+      , and alike.
+     </td>
+    </tr>
+    <tr class="sc-eEieub jPqTBr">
+     <td class="sc-eopZyb gzVyrk">
+      attrs
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+     </td>
+     <td class="sc-eopZyb gzVyrk">
+      Further information defining attributes of the mask such as the URL in a link.
+     </td>
+    </tr>
+   </tbody>
+  </table>
+ </div>
+ <p>
+  The marks include:
+ </p>
+ <ul>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/marks/border" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       border
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/marks/code" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       code
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/marks/em" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       em
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/marks/link" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       link
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/marks/strike" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       strike
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/marks/strong" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       strong
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/marks/subsup" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       subsup
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/marks/textColor" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       textColor
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+  <li>
+   <a href="/cloud/jira/platform/apis/document/marks/underline" target="_self">
+    <span class="sc-jdeSqf cQNBrn">
+     <span style="font-family:function () {
+    return &quot;'SFMono-Medium', 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', 'Ubuntu Mono', Menlo, Consolas, Courier, monospace&quot;;
+};font-size:inherit;background:#F4F5F7;color:#172B4D;border-radius:3px;display:inline;overflow-x:auto;white-space:pre-wrap;padding:2px 4px;line-height:inherit">
+      <code>
+       underline
+      </code>
+     </span>
+    </span>
+   </a>
+  </li>
+ </ul>
+</div>
+
+
+Process finished with exit code 0
