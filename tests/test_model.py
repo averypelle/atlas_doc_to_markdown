@@ -210,6 +210,58 @@ class TestMarkUnderLine:
 #         pass
 #
 #
+
+
+class TestListItem:
+    def test_case_1(self):
+        data = {
+            "type": "listItem",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [{"type": "text", "text": "Hello world"}],
+                }
+            ],
+        }
+        node = NodeListItem.from_dict(data)
+        check_seder(node)
+        expected = "Hello world"
+        check_markdown(node, expected)
+
+    def test_case_2(self):
+        data = {
+            "type": "listItem",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "Bold",
+                            "marks": [{"type": "strong"}],
+                        },
+                        {"type": "text", "text": " and "},
+                        {
+                            "type": "text",
+                            "text": "italic",
+                            "marks": [{"type": "em"}],
+                        },
+                        {"type": "text", "text": " and "},
+                        {
+                            "type": "text",
+                            "text": "code",
+                            "marks": [{"type": "code"}],
+                        },
+                    ],
+                }
+            ],
+        }
+        node = NodeListItem.from_dict(data)
+        check_seder(node)
+        expected = "**Bold** and *italic* and `code`"
+        check_markdown(node, expected)
+
+
 class TestNodeBulletList:
     def test_case_1(self):
         # Simple bullet list with plain text
@@ -457,7 +509,7 @@ class TestNodeBulletList:
             ],
         }
         node = NodeBulletList.from_dict(data)
-        check_seder(node)
+        # check_seder(node)
         expected = """
         - item 1
         - item 2

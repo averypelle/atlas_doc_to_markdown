@@ -280,7 +280,7 @@ def _doc_content_to_markdown(
 @dataclasses.dataclass
 class NodeBlockQuote(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.blockquote.value)
-    content: T.List["T_NODE"] = dataclasses.field(default_factory=NA)
+    content: list["T_NODE"] = dataclasses.field(default_factory=NA)
 
     def to_markdown(self) -> str:
         return (
@@ -296,7 +296,7 @@ class NodeBlockQuote(BaseNode):
 @dataclasses.dataclass
 class NodeBulletList(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.bulletList.value)
-    content: T.List["T_NODE"] = dataclasses.field(default_factory=REQ)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
     def to_markdown(
         self,
@@ -345,7 +345,7 @@ _atlassian_lang_to_markdown_lang_mapping = {}
 class NodeCodeBlock(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.codeBlock.value)
     attrs: NodeCodeBlockAttrs = dataclasses.field(default_factory=NA)
-    content: T.List["T_NODE"] = dataclasses.field(default_factory=NA)
+    content: list["T_NODE"] = dataclasses.field(default_factory=NA)
 
     def to_markdown(self) -> str:
         code = _content_to_markdown(self.content)
@@ -377,7 +377,7 @@ class NodeDate(BaseNode):
 class NodeDoc(BaseNode):
     version: int = dataclasses.field(default=1)
     type: str = dataclasses.field(default=TypeEnum.doc.value)
-    content: T.List["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
         md = _doc_content_to_markdown(self.content)
@@ -412,7 +412,7 @@ class NodeExpandAttrs(Base):
 class NodeExpand(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.expand.value)
     attrs: NodeExpandAttrs = dataclasses.field(default_factory=REQ)
-    content: T.List["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default=REQ)
     marks: T.List["T_MARK"] = dataclasses.field(default=NA)
 
     def to_markdown(self) -> str:
@@ -434,7 +434,7 @@ class NodeHeadingAttrs(Base):
 class NodeHeading(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.heading.value)
     attrs: NodeHeadingAttrs = dataclasses.field(default_factory=REQ)
-    content: T.List["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
         """
@@ -465,7 +465,7 @@ class NodeInlineCard(BaseNode):
 @dataclasses.dataclass
 class NodeListItem(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.listItem.value)
-    content: T.List["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
         return _content_to_markdown(self.content)
@@ -494,7 +494,7 @@ class NodeMedia(BaseNode):
 @dataclasses.dataclass
 class NodeMediaGroup(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.mediaGroup.value)
-    content: T.List["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
         return ""
@@ -511,7 +511,7 @@ class NodeMediaSingleAttrs(Base):
 class NodeMediaSingle(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.mediaSingle.value)
     attrs: NodeMediaSingleAttrs = dataclasses.field(default_factory=REQ)
-    content: T.List["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
         return _content_to_markdown(self.content)
@@ -546,7 +546,7 @@ class NodeNestedExpandAttrs(Base):
 class NodeNestedExpand(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.nestedExpand.value)
     attrs: NodeNestedExpandAttrs = dataclasses.field(default_factory=NA)
-    content: T.List["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default=REQ)
 
 
 @dataclasses.dataclass
@@ -558,7 +558,7 @@ class NodeOrderedListAttrs(Base):
 class NodeOrderedList(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.orderedList.value)
     attrs: NodeOrderedListAttrs = dataclasses.field(default_factory=NA)
-    content: T.List["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(
         self,
@@ -612,7 +612,7 @@ class NodePanelAttrs(Base):
 class NodePanel(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.panel.value)
     attrs: NodePanelAttrs = dataclasses.field(default_factory=REQ)
-    content: T.List["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
         return (
@@ -642,7 +642,7 @@ class NodeParagraphAttrs(Base):
 class NodeParagraph(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.paragraph.value)
     attrs: NodeParagraphAttrs = dataclasses.field(default_factory=NA)
-    content: T.List["T_NODE"] = dataclasses.field(default_factory=NA)
+    content: list["T_NODE"] = dataclasses.field(default_factory=NA)
 
     def to_markdown(self) -> str:
         return _content_to_markdown(self.content) + "\n"
@@ -712,7 +712,7 @@ class NodeTaskItem(BaseNode):
 
     type: str = dataclasses.field(default=TypeEnum.taskItem.value)
     attrs: NodeTaskItemAttrs = dataclasses.field(default_factory=REQ)
-    content: T.List["T_NODE"] = dataclasses.field(default_factory=REQ)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self) -> str:
         # Convert state to checkbox representation

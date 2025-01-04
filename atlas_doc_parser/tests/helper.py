@@ -43,7 +43,8 @@ DEFAULT_VERBOSE = True
 
 def check_seder(
     inst: T.Optional[T_BASE],
-    verbose: bool = DEFAULT_VERBOSE,
+    # verbose: bool = DEFAULT_VERBOSE,
+    verbose: bool = False,
 ):
     if verbose:
         print("========== Check seder ==========")
@@ -77,12 +78,14 @@ def check_markdown(
     expected: str,
     verbose: bool = DEFAULT_VERBOSE,
 ):
+    markdown = node.to_markdown().strip()
+    expected = textwrap.dedent(expected).strip()
     if verbose:
         print("========== Debug markdown ==========")
-        print("nodemd:", [node.to_markdown().strip()])
+        print("nodemd:", [markdown])
         print("expect:", [expected])
         print("---------- nodemd ----------")
-        print(node.to_markdown().strip())
+        print(markdown)
         print("---------- expect ----------")
         print(expected)
-    assert node.to_markdown().strip() == textwrap.dedent(expected).strip()
+    assert markdown == expected
