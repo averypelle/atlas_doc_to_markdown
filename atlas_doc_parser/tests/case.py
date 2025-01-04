@@ -50,6 +50,136 @@ class CaseEnum:
         },
         md="[https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/)",
     )
+    block_quote_basic = NodeCase(
+        klass=model.NodeBlockQuote,
+        data={
+            "type": "blockquote",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [{"text": "Alice says:", "type": "text"}],
+                },
+                {
+                    "type": "paragraph",
+                    "content": [{"text": "Just do it!", "type": "text"}],
+                },
+            ],
+        },
+        md="""
+        > Alice says:
+        > 
+        > Just do it!
+        """,
+    )
+    block_quote_with_nested_structure = NodeCase(
+        klass=model.NodeBlockQuote,
+        data={
+            "type": "blockquote",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "text": "This is a one line paragraph. Text may have ",
+                            "type": "text",
+                        },
+                        {"text": "bold", "type": "text", "marks": [{"type": "strong"}]},
+                        {"text": ", ", "type": "text"},
+                        {"text": "italic", "type": "text", "marks": [{"type": "em"}]},
+                        {"text": ", ", "type": "text"},
+                        {
+                            "text": "underscore",
+                            "type": "text",
+                            "marks": [{"type": "underline"}],
+                        },
+                        {"text": ", ", "type": "text"},
+                        {
+                            "text": "strike through",
+                            "type": "text",
+                            "marks": [{"type": "strike"}],
+                        },
+                        {"text": ", ", "type": "text"},
+                        {
+                            "text": "hyperlink",
+                            "type": "text",
+                            "marks": [
+                                {
+                                    "type": "link",
+                                    "attrs": {
+                                        "href": "https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/"
+                                    },
+                                }
+                            ],
+                        },
+                        {"text": " and more.", "type": "text"},
+                    ],
+                },
+                {
+                    "type": "paragraph",
+                    "content": [{"text": "This is a bullet list", "type": "text"}],
+                },
+                {
+                    "type": "bulletList",
+                    "content": [
+                        {
+                            "type": "listItem",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"text": "bullet 1 in quote", "type": "text"}
+                                    ],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "listItem",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"text": "bullet 2 in quote", "type": "text"}
+                                    ],
+                                }
+                            ],
+                        },
+                    ],
+                },
+                {
+                    "type": "paragraph",
+                    "content": [{"text": "Code block in quote", "type": "text"}],
+                },
+                {"type": "paragraph", "content": [{"text": "Start", "type": "text"}]},
+                {
+                    "type": "codeBlock",
+                    "attrs": {"language": "python"},
+                    "content": [
+                        {"text": "def mul_two(a, b):\n    return a * b", "type": "text"}
+                    ],
+                },
+                {"type": "paragraph", "content": [{"text": "End", "type": "text"}]},
+            ],
+        },
+        md="""
+        > This is a one line paragraph. Text may have **bold**, *italic*, underscore, ~~strike through~~, [hyperlink](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/) and more.
+        > 
+        > This is a bullet list
+        > 
+        > - bullet 1 in quote
+        > - bullet 2 in quote
+        > 
+        > Code block in quote
+        > 
+        > Start
+        > 
+        > ```python
+        > def mul_two(a, b):
+        >     return a * b
+        > ```
+        > 
+        > End
+        """,
+    )
     bullet_list_with_single_plain_text_item = NodeCase(
         klass=model.NodeBulletList,
         data={
@@ -757,4 +887,1118 @@ class CaseEnum:
         > 
         > - List item 1
         """,
+    )
+    paragraph_with_simple_text = NodeCase(
+        klass=model.NodeParagraph,
+        data={
+            "type": "paragraph",
+            "content": [{"type": "text", "text": "Hello world"}],
+        },
+        md="Hello world",
+    )
+    paragraph_without_content = NodeCase(
+        klass=model.NodeParagraph,
+        data={
+            "type": "paragraph",
+        },
+        md="",
+    )
+    paragraph_with_multiple_text_nodes = NodeCase(
+        klass=model.NodeParagraph,
+        data={
+            "type": "paragraph",
+            "content": [
+                {"type": "text", "text": "Hello"},
+                {"type": "text", "text": " "},
+                {"type": "text", "text": "world"},
+            ],
+        },
+        md="Hello world",
+    )
+    paragraph_with_multiple_text_formats = NodeCase(
+        klass=model.NodeParagraph,
+        data={
+            "type": "paragraph",
+            "content": [
+                {"type": "text", "text": "Bold", "marks": [{"type": "strong"}]},
+                {"type": "text", "text": " and "},
+                {"type": "text", "text": "italic", "marks": [{"type": "em"}]},
+            ],
+        },
+        md="**Bold** and *italic*",
+    )
+
+    paragraph_with_local_id = NodeCase(
+        klass=model.NodeParagraph,
+        data={
+            "type": "paragraph",
+            "attrs": {"localId": "unique-id-123"},
+            "content": [{"type": "text", "text": "Hello world"}],
+        },
+        md="Hello world",
+    )
+    paragraph_with_emoji_and_mention = NodeCase(
+        klass=model.NodeParagraph,
+        data={
+            "type": "paragraph",
+            "content": [
+                {"type": "text", "text": "Hello "},
+                {"type": "emoji", "attrs": {"shortName": ":smile:", "text": "😊"}},
+                {"type": "text", "text": " "},
+                {"type": "mention", "attrs": {"id": "123", "text": "@user"}},
+            ],
+        },
+        md="Hello 😊 @user",
+    )
+    paragraph_with_hyperlink = NodeCase(
+        klass=model.NodeParagraph,
+        data={
+            "type": "paragraph",
+            "content": [
+                {
+                    "type": "text",
+                    "text": "Visit us at ",
+                },
+                {
+                    "type": "text",
+                    "text": "HERE",
+                    "marks": [
+                        {
+                            "type": "link",
+                            "attrs": {
+                                "href": "https://example.com",
+                            },
+                        }
+                    ],
+                },
+            ],
+        },
+        md="Visit us at [HERE](https://example.com)",
+    )
+    table_with_complex_nested_content = NodeCase(
+        klass=model.NodeTable,
+        data={
+            "type": "table",
+            "attrs": {
+                "layout": "default",
+                "width": 760.0,
+                "localId": "662e4ab6-11fd-4afa-8c15-613b7bee54cb",
+            },
+            "content": [
+                {
+                    "type": "tableRow",
+                    "content": [
+                        {
+                            "type": "tableHeader",
+                            "attrs": {"colspan": 1, "rowspan": 1},
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {
+                                            "text": "Col 1",
+                                            "type": "text",
+                                            "marks": [{"type": "strong"}],
+                                        }
+                                    ],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "tableHeader",
+                            "attrs": {"colspan": 1, "rowspan": 1},
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {
+                                            "text": "Col 2",
+                                            "type": "text",
+                                            "marks": [{"type": "strong"}],
+                                        }
+                                    ],
+                                }
+                            ],
+                        },
+                    ],
+                },
+                {
+                    "type": "tableRow",
+                    "content": [
+                        {
+                            "type": "tableCell",
+                            "attrs": {"colspan": 1, "rowspan": 1},
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [{"text": "key 1", "type": "text"}],
+                                },
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {
+                                            "text": "special character | is not markdown friendly",
+                                            "type": "text",
+                                        }
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            "type": "tableCell",
+                            "attrs": {"colspan": 1, "rowspan": 1},
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [{"text": "value 1", "type": "text"}],
+                                },
+                                {
+                                    "type": "bulletList",
+                                    "content": [
+                                        {
+                                            "type": "listItem",
+                                            "content": [
+                                                {
+                                                    "type": "paragraph",
+                                                    "content": [
+                                                        {
+                                                            "text": "this is ",
+                                                            "type": "text",
+                                                        },
+                                                        {
+                                                            "text": "Alice",
+                                                            "type": "text",
+                                                            "marks": [
+                                                                {"type": "strong"}
+                                                            ],
+                                                        },
+                                                        {"text": ", ", "type": "text"},
+                                                        {
+                                                            "text": "Bob",
+                                                            "type": "text",
+                                                            "marks": [{"type": "em"}],
+                                                        },
+                                                        {"text": ", ", "type": "text"},
+                                                        {
+                                                            "text": "Cathy",
+                                                            "type": "text",
+                                                            "marks": [
+                                                                {"type": "underline"}
+                                                            ],
+                                                        },
+                                                        {"text": ", ", "type": "text"},
+                                                        {
+                                                            "text": "David",
+                                                            "type": "text",
+                                                            "marks": [
+                                                                {"type": "strike"}
+                                                            ],
+                                                        },
+                                                        {"text": ", ", "type": "text"},
+                                                        {
+                                                            "text": "Edward",
+                                                            "type": "text",
+                                                            "marks": [{"type": "code"}],
+                                                        },
+                                                        {"text": ", ", "type": "text"},
+                                                        {
+                                                            "text": "Frank",
+                                                            "type": "text",
+                                                            "marks": [
+                                                                {
+                                                                    "type": "subsup",
+                                                                    "attrs": {
+                                                                        "type": "sub"
+                                                                    },
+                                                                }
+                                                            ],
+                                                        },
+                                                        {"text": ", ", "type": "text"},
+                                                        {
+                                                            "text": "George",
+                                                            "type": "text",
+                                                            "marks": [
+                                                                {
+                                                                    "type": "subsup",
+                                                                    "attrs": {
+                                                                        "type": "sup"
+                                                                    },
+                                                                }
+                                                            ],
+                                                        },
+                                                        {"text": ".", "type": "text"},
+                                                    ],
+                                                }
+                                            ],
+                                        },
+                                        {
+                                            "type": "listItem",
+                                            "content": [
+                                                {
+                                                    "type": "paragraph",
+                                                    "content": [
+                                                        {
+                                                            "text": "This line has titled hyperlink ",
+                                                            "type": "text",
+                                                        },
+                                                        {
+                                                            "text": "Atlas Doc Format",
+                                                            "type": "text",
+                                                            "marks": [
+                                                                {
+                                                                    "type": "link",
+                                                                    "attrs": {
+                                                                        "href": "https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/"
+                                                                    },
+                                                                }
+                                                            ],
+                                                        },
+                                                        {"text": ".", "type": "text"},
+                                                    ],
+                                                }
+                                            ],
+                                        },
+                                        {
+                                            "type": "listItem",
+                                            "content": [
+                                                {
+                                                    "type": "paragraph",
+                                                    "content": [
+                                                        {
+                                                            "text": "This line has url hyperlink ",
+                                                            "type": "text",
+                                                        },
+                                                        {
+                                                            "type": "inlineCard",
+                                                            "attrs": {
+                                                                "url": "https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/"
+                                                            },
+                                                        },
+                                                        {
+                                                            "text": "    ",
+                                                            "type": "text",
+                                                        },
+                                                    ],
+                                                }
+                                            ],
+                                        },
+                                        {
+                                            "type": "listItem",
+                                            "content": [
+                                                {
+                                                    "type": "paragraph",
+                                                    "content": [
+                                                        {
+                                                            "text": "This line has inline hyperlink ",
+                                                            "type": "text",
+                                                        },
+                                                        {
+                                                            "type": "inlineCard",
+                                                            "attrs": {
+                                                                "url": "https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/"
+                                                            },
+                                                        },
+                                                    ],
+                                                }
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    "type": "tableRow",
+                    "content": [
+                        {
+                            "type": "tableCell",
+                            "attrs": {"colspan": 1, "rowspan": 1},
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [{"text": "key 2", "type": "text"}],
+                                },
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {
+                                            "text": "special character | is not markdown friendly",
+                                            "type": "text",
+                                        }
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            "type": "tableCell",
+                            "attrs": {"colspan": 1, "rowspan": 1},
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [{"text": "value 2", "type": "text"}],
+                                },
+                                {
+                                    "type": "orderedList",
+                                    "attrs": {"order": 1},
+                                    "content": [
+                                        {
+                                            "type": "listItem",
+                                            "content": [
+                                                {
+                                                    "type": "paragraph",
+                                                    "content": [
+                                                        {
+                                                            "text": "Alice",
+                                                            "type": "text",
+                                                        }
+                                                    ],
+                                                }
+                                            ],
+                                        },
+                                        {
+                                            "type": "listItem",
+                                            "content": [
+                                                {
+                                                    "type": "paragraph",
+                                                    "content": [
+                                                        {"text": "Bob", "type": "text"}
+                                                    ],
+                                                }
+                                            ],
+                                        },
+                                        {
+                                            "type": "listItem",
+                                            "content": [
+                                                {
+                                                    "type": "paragraph",
+                                                    "content": [
+                                                        {
+                                                            "text": "Cathy",
+                                                            "type": "text",
+                                                        }
+                                                    ],
+                                                },
+                                                {
+                                                    "type": "orderedList",
+                                                    "attrs": {"order": 1},
+                                                    "content": [
+                                                        {
+                                                            "type": "listItem",
+                                                            "content": [
+                                                                {
+                                                                    "type": "paragraph",
+                                                                    "content": [
+                                                                        {
+                                                                            "text": "Cathy 1",
+                                                                            "type": "text",
+                                                                        }
+                                                                    ],
+                                                                },
+                                                                {
+                                                                    "type": "orderedList",
+                                                                    "attrs": {
+                                                                        "order": 1
+                                                                    },
+                                                                    "content": [
+                                                                        {
+                                                                            "type": "listItem",
+                                                                            "content": [
+                                                                                {
+                                                                                    "type": "paragraph",
+                                                                                    "content": [
+                                                                                        {
+                                                                                            "text": "Cathy 1.1",
+                                                                                            "type": "text",
+                                                                                        }
+                                                                                    ],
+                                                                                }
+                                                                            ],
+                                                                        },
+                                                                        {
+                                                                            "type": "listItem",
+                                                                            "content": [
+                                                                                {
+                                                                                    "type": "paragraph",
+                                                                                    "content": [
+                                                                                        {
+                                                                                            "text": "Cathy 1.2",
+                                                                                            "type": "text",
+                                                                                        }
+                                                                                    ],
+                                                                                }
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                        {
+                                                            "type": "listItem",
+                                                            "content": [
+                                                                {
+                                                                    "type": "paragraph",
+                                                                    "content": [
+                                                                        {
+                                                                            "text": "Cathy 2",
+                                                                            "type": "text",
+                                                                        }
+                                                                    ],
+                                                                },
+                                                                {
+                                                                    "type": "orderedList",
+                                                                    "attrs": {
+                                                                        "order": 1
+                                                                    },
+                                                                    "content": [
+                                                                        {
+                                                                            "type": "listItem",
+                                                                            "content": [
+                                                                                {
+                                                                                    "type": "paragraph",
+                                                                                    "content": [
+                                                                                        {
+                                                                                            "text": "Cathy 2.1",
+                                                                                            "type": "text",
+                                                                                        }
+                                                                                    ],
+                                                                                }
+                                                                            ],
+                                                                        },
+                                                                        {
+                                                                            "type": "listItem",
+                                                                            "content": [
+                                                                                {
+                                                                                    "type": "paragraph",
+                                                                                    "content": [
+                                                                                        {
+                                                                                            "text": "Cathy 2.2",
+                                                                                            "type": "text",
+                                                                                        }
+                                                                                    ],
+                                                                                }
+                                                                            ],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    "type": "tableRow",
+                    "content": [
+                        {
+                            "type": "tableCell",
+                            "attrs": {"colspan": 1, "rowspan": 1},
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [{"text": "key 3", "type": "text"}],
+                                },
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {
+                                            "text": "special character | is not markdown friendly",
+                                            "type": "text",
+                                        }
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            "type": "tableCell",
+                            "attrs": {"colspan": 1, "rowspan": 1},
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [{"text": "value 3", "type": "text"}],
+                                },
+                                {
+                                    "type": "taskList",
+                                    "attrs": {"localId": ""},
+                                    "content": [
+                                        {
+                                            "type": "taskItem",
+                                            "attrs": {"state": "DONE", "localId": "33"},
+                                            "content": [
+                                                {"text": "Do this", "type": "text"}
+                                            ],
+                                        },
+                                        {
+                                            "type": "taskItem",
+                                            "attrs": {"state": "TODO", "localId": "34"},
+                                            "content": [
+                                                {"text": "And do ", "type": "text"},
+                                                {
+                                                    "text": "this",
+                                                    "type": "text",
+                                                    "marks": [{"type": "strong"}],
+                                                },
+                                            ],
+                                        },
+                                        {
+                                            "type": "taskList",
+                                            "attrs": {"localId": ""},
+                                            "content": [
+                                                {
+                                                    "type": "taskItem",
+                                                    "attrs": {
+                                                        "state": "TODO",
+                                                        "localId": "35",
+                                                    },
+                                                    "content": [
+                                                        {
+                                                            "text": "sub ",
+                                                            "type": "text",
+                                                        },
+                                                        {
+                                                            "text": "task",
+                                                            "type": "text",
+                                                            "marks": [{"type": "code"}],
+                                                        },
+                                                        {"text": " 1", "type": "text"},
+                                                    ],
+                                                },
+                                                {
+                                                    "type": "taskList",
+                                                    "attrs": {"localId": ""},
+                                                    "content": [
+                                                        {
+                                                            "type": "taskItem",
+                                                            "attrs": {
+                                                                "state": "DONE",
+                                                                "localId": "36",
+                                                            },
+                                                            "content": [
+                                                                {
+                                                                    "text": "sub ",
+                                                                    "type": "text",
+                                                                },
+                                                                {
+                                                                    "text": "task",
+                                                                    "type": "text",
+                                                                    "marks": [
+                                                                        {
+                                                                            "type": "underline"
+                                                                        }
+                                                                    ],
+                                                                },
+                                                                {
+                                                                    "text": " 1.1",
+                                                                    "type": "text",
+                                                                },
+                                                            ],
+                                                        },
+                                                        {
+                                                            "type": "taskItem",
+                                                            "attrs": {
+                                                                "state": "TODO",
+                                                                "localId": "37",
+                                                            },
+                                                            "content": [
+                                                                {
+                                                                    "text": "sub ",
+                                                                    "type": "text",
+                                                                },
+                                                                {
+                                                                    "text": "task",
+                                                                    "type": "text",
+                                                                    "marks": [
+                                                                        {
+                                                                            "type": "strike"
+                                                                        }
+                                                                    ],
+                                                                },
+                                                                {
+                                                                    "text": " 1.2",
+                                                                    "type": "text",
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                                {
+                                                    "type": "taskItem",
+                                                    "attrs": {
+                                                        "state": "TODO",
+                                                        "localId": "38",
+                                                    },
+                                                    "content": [
+                                                        {
+                                                            "text": "sub ",
+                                                            "type": "text",
+                                                        },
+                                                        {
+                                                            "text": "task",
+                                                            "type": "text",
+                                                            "marks": [
+                                                                {"type": "strong"}
+                                                            ],
+                                                        },
+                                                        {"text": " 2", "type": "text"},
+                                                    ],
+                                                },
+                                                {
+                                                    "type": "taskList",
+                                                    "attrs": {"localId": ""},
+                                                    "content": [
+                                                        {
+                                                            "type": "taskItem",
+                                                            "attrs": {
+                                                                "state": "TODO",
+                                                                "localId": "39",
+                                                            },
+                                                            "content": [
+                                                                {
+                                                                    "text": "sub ",
+                                                                    "type": "text",
+                                                                },
+                                                                {
+                                                                    "text": "task",
+                                                                    "type": "text",
+                                                                    "marks": [
+                                                                        {
+                                                                            "type": "textColor",
+                                                                            "attrs": {
+                                                                                "color": "#ff5630"
+                                                                            },
+                                                                        }
+                                                                    ],
+                                                                },
+                                                                {
+                                                                    "text": " 2.1",
+                                                                    "type": "text",
+                                                                },
+                                                            ],
+                                                        },
+                                                        {
+                                                            "type": "taskItem",
+                                                            "attrs": {
+                                                                "state": "DONE",
+                                                                "localId": "40",
+                                                            },
+                                                            "content": [
+                                                                {
+                                                                    "text": "sub ",
+                                                                    "type": "text",
+                                                                },
+                                                                {
+                                                                    "text": "task",
+                                                                    "type": "text",
+                                                                    "marks": [
+                                                                        {
+                                                                            "type": "backgroundColor",
+                                                                            "attrs": {
+                                                                                "color": "#c6edfb"
+                                                                            },
+                                                                        }
+                                                                    ],
+                                                                },
+                                                                {
+                                                                    "text": " 2.2",
+                                                                    "type": "text",
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        md=r"""
+        | **Col 1**<br> | **Col 2**<br> |
+        | --- | --- |
+        | key 1<br>special character \| is not markdown friendly<br> | value 1<br>- this is **Alice**, *Bob*, Cathy, ~~David~~, `Edward`, Frank, George.<br>- This line has titled hyperlink [Atlas Doc Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).<br>- This line has url hyperlink [https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/)<br>- This line has inline hyperlink [https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/) |
+        | key 2<br>special character \| is not markdown friendly<br> | value 2<br>1. Alice<br>2. Bob<br>3. Cathy<br>    1. Cathy 1<br>        1. Cathy 1.1<br>        2. Cathy 1.2<br>    2. Cathy 2<br>        1. Cathy 2.1<br>        2. Cathy 2.2 |
+        | key 3<br>special character \| is not markdown friendly<br> | value 3<br>- [x] Do this<br>- [ ] And do **this**<br>    - [ ] sub `task` 1<br>        - [x] sub task 1.1<br>        - [ ] sub ~~task~~ 1.2<br>    - [ ] sub **task** 2<br>        - [ ] sub task 2.1<br>        - [x] sub task 2.2 |
+        """,
+    )
+    table_cell_with_escaped_pipe_char = NodeCase(
+        klass=model.NodeTableCell,
+        data={
+            "type": "tableCell",
+            "attrs": {"colspan": 1, "rowspan": 1},
+            "content": [
+                {"type": "paragraph", "content": [{"text": "key 1", "type": "text"}]},
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "text": "special character | is not markdown friendly",
+                            "type": "text",
+                        }
+                    ],
+                },
+            ],
+        },
+        md=r"key 1<br>special character \| is not markdown friendly<br>",
+    )
+    table_cell_with_bullet_list = NodeCase(
+        klass=model.NodeTableCell,
+        data={
+            "type": "tableCell",
+            "attrs": {"colspan": 1, "rowspan": 1},
+            "content": [
+                {"type": "paragraph", "content": [{"text": "value 1", "type": "text"}]},
+                {
+                    "type": "bulletList",
+                    "content": [
+                        {
+                            "type": "listItem",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [{"text": "a", "type": "text"}],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "listItem",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [{"text": "b", "type": "text"}],
+                                }
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        md="value 1<br>- a<br>- b",
+    )
+    table_header_with_bold_text = NodeCase(
+        klass=model.NodeTableHeader,
+        data={
+            "type": "tableHeader",
+            "attrs": {"colspan": 1, "rowspan": 1},
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"text": "Col 1", "type": "text", "marks": [{"type": "strong"}]}
+                    ],
+                }
+            ],
+        },
+        md="**Col 1**<br>",
+    )
+    table_row_with_multiple_cells = NodeCase(
+        klass=model.NodeTableRow,
+        data={
+            "type": "tableRow",
+            "content": [
+                {
+                    "type": "tableCell",
+                    "attrs": {"colspan": 1, "rowspan": 1},
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"text": "key 1", "type": "text"}],
+                        },
+                        {
+                            "type": "paragraph",
+                            "content": [
+                                {
+                                    "text": "special character | is not markdown friendly",
+                                    "type": "text",
+                                }
+                            ],
+                        },
+                    ],
+                },
+                {
+                    "type": "tableCell",
+                    "attrs": {"colspan": 1, "rowspan": 1},
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"text": "value 1", "type": "text"}],
+                        },
+                        {
+                            "type": "bulletList",
+                            "content": [
+                                {
+                                    "type": "listItem",
+                                    "content": [
+                                        {
+                                            "type": "paragraph",
+                                            "content": [{"text": "a", "type": "text"}],
+                                        }
+                                    ],
+                                },
+                                {
+                                    "type": "listItem",
+                                    "content": [
+                                        {
+                                            "type": "paragraph",
+                                            "content": [{"text": "b", "type": "text"}],
+                                        }
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        md=r"| key 1<br>special character \| is not markdown friendly<br> | value 1<br>- a<br>- b |",
+    )
+    task_list_with_multiple_states = NodeCase(
+        klass=model.NodeTaskList,
+        data={
+            "type": "taskList",
+            "attrs": {"localId": ""},
+            "content": [
+                {
+                    "type": "taskItem",
+                    "attrs": {"state": "DONE", "localId": "25"},
+                    "content": [{"text": "Do this", "type": "text"}],
+                },
+                {
+                    "type": "taskItem",
+                    "attrs": {"state": "TODO", "localId": "26"},
+                    "content": [{"text": "And do this", "type": "text"}],
+                },
+            ],
+        },
+        md="""
+        - [x] Do this
+        - [ ] And do this
+        """,
+    )
+    task_list_with_nested_structure = NodeCase(
+        klass=model.NodeTaskList,
+        data={
+            "type": "taskList",
+            "attrs": {"localId": ""},
+            "content": [
+                {
+                    "type": "taskItem",
+                    "attrs": {"state": "DONE", "localId": "25"},
+                    "content": [{"text": "Do this", "type": "text"}],
+                },
+                {
+                    "type": "taskItem",
+                    "attrs": {"state": "TODO", "localId": "26"},
+                    "content": [{"text": "And do this", "type": "text"}],
+                },
+                {
+                    "type": "taskList",
+                    "attrs": {"localId": ""},
+                    "content": [
+                        {
+                            "type": "taskItem",
+                            "attrs": {"state": "TODO", "localId": "27"},
+                            "content": [
+                                {"text": "sub ", "type": "text"},
+                                {
+                                    "text": "task 1",
+                                    "type": "text",
+                                    "marks": [{"type": "code"}],
+                                },
+                            ],
+                        },
+                        {
+                            "type": "taskList",
+                            "attrs": {"localId": ""},
+                            "content": [
+                                {
+                                    "type": "taskItem",
+                                    "attrs": {"state": "DONE", "localId": "28"},
+                                    "content": [
+                                        {"text": "sub task 1.1", "type": "text"}
+                                    ],
+                                },
+                                {
+                                    "type": "taskItem",
+                                    "attrs": {"state": "TODO", "localId": "29"},
+                                    "content": [
+                                        {"text": "sub task 1.2", "type": "text"}
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            "type": "taskItem",
+                            "attrs": {"state": "TODO", "localId": "30"},
+                            "content": [
+                                {"text": "sub ", "type": "text"},
+                                {
+                                    "text": "task 2",
+                                    "type": "text",
+                                    "marks": [{"type": "strong"}],
+                                },
+                            ],
+                        },
+                        {
+                            "type": "taskList",
+                            "attrs": {"localId": ""},
+                            "content": [
+                                {
+                                    "type": "taskItem",
+                                    "attrs": {"state": "TODO", "localId": "31"},
+                                    "content": [
+                                        {"text": "sub task 2.1", "type": "text"}
+                                    ],
+                                },
+                                {
+                                    "type": "taskItem",
+                                    "attrs": {"state": "DONE", "localId": "32"},
+                                    "content": [
+                                        {"text": "sub task 2.2", "type": "text"}
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        md="""
+        - [x] Do this
+        - [ ] And do this
+            - [ ] sub `task 1`
+                - [x] sub task 1.1
+                - [ ] sub task 1.2
+            - [ ] sub **task 2**
+                - [ ] sub task 2.1
+                - [x] sub task 2.2
+        """,
+    )
+    text_node_plain_text = NodeCase(
+        klass=model.NodeText,
+        data={"type": "text", "text": "Hello world"},
+        # Plain text should remain unchanged
+        md="Hello world",
+    )
+    text_node_with_strong_emphasis = NodeCase(
+        klass=model.NodeText,
+        data={"type": "text", "text": "Hello world", "marks": [{"type": "strong"}]},
+        md="**Hello world**",
+    )
+    text_node_with_italic = NodeCase(
+        klass=model.NodeText,
+        data={
+            "type": "text",
+            "text": "Hello world",
+            "marks": [{"type": "em"}]
+        },
+        md="*Hello world*",
+    )
+    text_node_with_underline = NodeCase(
+        klass=model.NodeText,
+        data={
+            "type": "text",
+            "text": "Hello world",
+            "marks": [{"type": "underline"}]
+        },
+        # HTML underline doesn't have standard markdown equivalent
+        md="Hello world",
+    )
+    text_node_with_strikethrough = NodeCase(
+        klass=model.NodeText,
+        data={
+            "type": "text",
+            "text": "Hello world",
+            "marks": [{"type": "strike"}]
+        },
+        md="~~Hello world~~",
+    )
+    text_node_with_code_mark = NodeCase(
+        klass=model.NodeText,
+        data={
+            "type": "text",
+            "text": "Hello world",
+            "marks": [{"type": "code"}]
+        },
+        md="`Hello world`",
+    )
+    text_node_with_subscript = NodeCase(
+        klass=model.NodeText,
+        data={
+            "type": "text",
+            "text": "Hello world",
+            "marks": [{"type": "subsup", "attrs": {"type": "sub"}}]
+        },
+        # Subscript doesn't have standard markdown equivalent
+        md="Hello world",
+    )
+    text_node_with_superscript = NodeCase(
+        klass=model.NodeText,
+        data={
+            "type": "text",
+            "text": "superscript",
+            "marks": [{"type": "subsup", "attrs": {"type": "sup"}}]
+        },
+        # Superscript doesn't have standard markdown equivalent
+        md="superscript",
+    )
+    text_node_with_text_color = NodeCase(
+        klass=model.NodeText,
+        data={
+            "type": "text",
+            "text": "Hello world",
+            "marks": [{"type": "textColor", "attrs": {"color": "#97a0af"}}]
+        },
+        # Text color doesn't have markdown equivalent
+        md="Hello world",
+    )
+    text_node_with_background_color = NodeCase(
+        klass=model.NodeText,
+        data={
+            "type": "text",
+            "text": "Hello world",
+            "marks": [{"type": "backgroundColor", "attrs": {"color": "#fedec8"}}]
+        },
+        # Background color doesn't have markdown equivalent
+        md="Hello world",
+    )
+    text_node_with_titled_hyperlink = NodeCase(
+        klass=model.NodeText,
+        data={
+            "text": "Atlassian",
+            "type": "text",
+            "marks": [
+                {
+                    "type": "link",
+                    "attrs": {
+                        "href": "http://atlassian.com",
+                        "title": "Atlassian"
+                    }
+                }
+            ]
+        },
+        md="[Atlassian](http://atlassian.com)",
+    )
+    text_node_with_url_hyperlink = NodeCase(
+        klass=model.NodeText,
+        data={
+            "text": "Atlassian",
+            "type": "text",
+            "marks": [
+                {
+                    "type": "link",
+                    "attrs": {"href": "http://atlassian.com"}
+                }
+            ]
+        },
+        md="[Atlassian](http://atlassian.com)",
     )
