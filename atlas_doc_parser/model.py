@@ -261,6 +261,7 @@ def _content_to_markdown(
 def _doc_content_to_markdown(
     content: T.Union[T.List["T_NODE"], NA],
     concat: str = "\n",
+    ignore_error: bool = False,
 ) -> str:
     if isinstance(content, NA):
         return ""
@@ -268,13 +269,19 @@ def _doc_content_to_markdown(
         lst = list()
         for node in content:
             # print("----- Work on a new node -----")
-            if isinstance(node, (NodeBulletList, NodeOrderedList, NodeCodeBlock)):
-                md = "\n" + node.to_markdown() + "\n"
-            else:
-                md = node.to_markdown()
-            # print(f"{node = }")
-            # print(f"{md = }")
-            lst.append(md)
+            try:
+                if isinstance(node, (NodeBulletList, NodeOrderedList, NodeCodeBlock)):
+                    md = "\n" + node.to_markdown() + "\n"
+                else:
+                    md = node.to_markdown()
+                # print(f"{node = }")
+                # print(f"{md = }")
+                lst.append(md)
+            except Exception as e:  # pragma: no cover
+                if ignore_error:
+                    pass
+                else:
+                    raise e
 
     md = _strip_double_empty_line(concat.join(lst))
     return md
@@ -415,8 +422,8 @@ class NodeDoc(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.doc.value)
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
-        md = _doc_content_to_markdown(self.content)
+    def to_markdown(self, ignore_error: bool = False) -> str:
+        md = _doc_content_to_markdown(self.content, ignore_error=ignore_error)
         return md
 
 
