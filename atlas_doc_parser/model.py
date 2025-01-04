@@ -381,6 +381,8 @@ class NodeCodeBlock(BaseNode):
                     self.attrs.language,
                     self.attrs.language,
                 )
+        if lang == "none":
+            lang = ""
         return f"```{lang}\n{code}\n```"
 
 

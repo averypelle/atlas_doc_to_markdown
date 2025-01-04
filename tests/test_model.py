@@ -48,7 +48,7 @@ from atlas_doc_parser.model import (
     parse_node,
 )
 from atlas_doc_parser.tests import check_seder, check_markdown
-from atlas_doc_parser.tests.case import Case
+from atlas_doc_parser.tests.case import NodeCase, CaseEnum
 
 
 class TestMarkBackGroundColor:
@@ -83,13 +83,13 @@ class TestMarkCode:
         multiline_code = "def func():\n    return True"
         assert mark.to_markdown(multiline_code) == "`def func():\n    return True`"
 
-    def test_empty_code(self):
+    def test_code_mark_with_empty_string(self):
         """Test code mark with empty string."""
         data = {"type": "code"}
         mark = MarkCode.from_dict(data)
         assert mark.to_markdown("") == "``"
 
-    def test_code_mark_whitespace(self):
+    def test_code_mark_preserves_whitespace_and_newlines(self):
         """Test code mark with various whitespace scenarios."""
         data = {"type": "code"}
         mark = MarkCode.from_dict(data)
@@ -110,8 +110,7 @@ class TestMarkEm:
 
 
 class TestMarkLink:
-    def test_case_1(self):
-        """Test basic link creation with title."""
+    def test_link_mark_with_title_and_href(self):
         data = {
             "type": "link",
             "attrs": {"href": "http://atlassian.com", "title": "Atlassian"},
@@ -123,22 +122,19 @@ class TestMarkLink:
         assert mark.to_dict() == data
         assert mark.to_markdown("Atlassian") == "[Atlassian](http://atlassian.com)"
 
-    def test_case_2(self):
-        """Test link without title."""
+    def test_link_mark_without_title_uses_text(self):
         data = {"type": "link", "attrs": {"href": "http://example.com"}}
         mark = MarkLink.from_dict(data)
         check_seder(mark)
         # When no title is provided, it should use the text content
         assert mark.to_markdown("Click here") == "[Click here](http://example.com)"
 
-    def test_case_4(self):
-        """Test error handling for missing required attributes."""
+    def test_link_mark_missing_required_attrs_raises(self):
         data = {"type": "link", "attrs": {}}
         with pytest.raises(ParamError):
             MarkLink.from_dict(data)
 
-    def test_case_5(self):
-        """Test link with special characters in URL."""
+    def test_link_mark_with_special_chars_in_url(self):
         data = {
             "type": "link",
             "attrs": {
@@ -176,14 +172,14 @@ class TestMarkStrong:
         special_text = "Hello * World ** !"
         assert mark.to_markdown(special_text) == f"**{special_text}**"
 
-    def test_strong_mark_empty_text(self):
+    def test_strong_mark_with_empty_string(self):
         """Test strong mark with empty text."""
         data = {"type": "strong"}
         mark = MarkStrong.from_dict(data)
         check_seder(mark)
         assert mark.to_markdown("") == "****"
 
-    def test_strong_mark_with_whitespace(self):
+    def test_strong_mark_preserves_whitespace(self):
         """Test strong mark with text containing various whitespace."""
         data = {"type": "strong"}
         mark = MarkStrong.from_dict(data)
@@ -208,17 +204,8 @@ class TestMarkUnderLine:
 
 
 class TestNodeBlockCard:
-    def test_case_1(self):
-        data = {
-            "type": "blockCard",
-            "attrs": {
-                "url": "https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/"
-            },
-        }
-        node = NodeBlockCard.from_dict(data)
-        check_seder(node)
-        expected = "[https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/)"
-        check_markdown(node, expected)
+    def test_block_card_with_url_to_markdown(self):
+        CaseEnum.block_card_with_url_to_markdown.test()
 
 
 class TestNodeBlockQuote:
@@ -227,23 +214,10 @@ class TestNodeBlockQuote:
 
 
 class TestNodeBulletList:
-    def test_case_1(self):
-        # Simple bullet list with plain text
-        data = {
-            "type": "bulletList",
-            "content": [
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [{"type": "text", "text": "Hello world"}],
-                        }
-                    ],
-                }
-            ],
-        }
-        node: NodeBulletList = NodeBulletList.from_dict(data)
+    def test_bullet_list_with_single_plain_text_item(self):
+        case = CaseEnum.bullet_list_with_single_plain_text_item.test()
+
+        node = case.node
         node_list_item = node.content[0]
         assert isinstance(node_list_item, NodeListItem)
         node_paragraph = node_list_item.content[0]
@@ -251,302 +225,62 @@ class TestNodeBulletList:
         node_text = node_paragraph.content[0]
         assert isinstance(node_text, NodeText)
 
-        check_seder(node)
-        expected = "- Hello world"
-        check_markdown(node, expected)
+    def test_bullet_list_with_formatted_text_marks(self):
+        CaseEnum.bullet_list_with_formatted_text_marks.test()
 
-    def test_case_2(self):
-        # Test case 2: Bullet list with formatted text (bold, italic, code)
-        data = {
-            "type": "bulletList",
-            "content": [
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": "Bold",
-                                    "marks": [{"type": "strong"}],
-                                },
-                                {"type": "text", "text": " and "},
-                                {
-                                    "type": "text",
-                                    "text": "italic",
-                                    "marks": [{"type": "em"}],
-                                },
-                                {"type": "text", "text": " and "},
-                                {
-                                    "type": "text",
-                                    "text": "code",
-                                    "marks": [{"type": "code"}],
-                                },
-                            ],
-                        }
-                    ],
-                }
-            ],
-        }
-        node = NodeBulletList.from_dict(data)
-        check_seder(node)
-        expected = "- **Bold** and *italic* and `code`"
-        check_markdown(node, expected)
+    def test_bullet_list_with_links_and_mixed_formatting(self):
+        CaseEnum.bullet_list_with_links_and_mixed_formatting.test()
 
-    def test_case_3(self):
-        # Test case 3: Multiple bullet points with links and mixed formatting
-        data = {
-            "type": "bulletList",
-            "content": [
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": "Visit ",
-                                },
-                                {
-                                    "type": "text",
-                                    "text": "Atlassian",
-                                    "marks": [
-                                        {
-                                            "type": "link",
-                                            "attrs": {
-                                                "href": "http://atlassian.com",
-                                                "title": "Atlassian",
-                                            },
-                                        }
-                                    ],
-                                },
-                            ],
-                        }
-                    ],
-                },
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": "This is ",
-                                },
-                                {
-                                    "type": "text",
-                                    "text": "strikethrough",
-                                    "marks": [{"type": "strike"}],
-                                },
-                            ],
-                        }
-                    ],
-                },
-            ],
-        }
-        node = NodeBulletList.from_dict(data)
-        check_seder(node)
-        expected = """
-        - Visit [Atlassian](http://atlassian.com)
-        - This is ~~strikethrough~~
-        """
-        check_markdown(node, expected)
-
-    def test_case_4(self):
-        data = {
-            "type": "bulletList",
-            "content": [
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [{"text": "item 1", "type": "text"}],
-                        }
-                    ],
-                },
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [{"text": "item 2", "type": "text"}],
-                        },
-                        {
-                            "type": "bulletList",
-                            "content": [
-                                {
-                                    "type": "listItem",
-                                    "content": [
-                                        {
-                                            "type": "paragraph",
-                                            "content": [
-                                                {"text": "item 2.1", "type": "text"}
-                                            ],
-                                        },
-                                        {
-                                            "type": "bulletList",
-                                            "content": [
-                                                {
-                                                    "type": "listItem",
-                                                    "content": [
-                                                        {
-                                                            "type": "paragraph",
-                                                            "content": [
-                                                                {
-                                                                    "text": "item 2.1.1",
-                                                                    "type": "text",
-                                                                }
-                                                            ],
-                                                        }
-                                                    ],
-                                                },
-                                                {
-                                                    "type": "listItem",
-                                                    "content": [
-                                                        {
-                                                            "type": "paragraph",
-                                                            "content": [
-                                                                {
-                                                                    "text": "item 2.1.2",
-                                                                    "type": "text",
-                                                                }
-                                                            ],
-                                                        }
-                                                    ],
-                                                },
-                                            ],
-                                        },
-                                    ],
-                                },
-                                {
-                                    "type": "listItem",
-                                    "content": [
-                                        {
-                                            "type": "paragraph",
-                                            "content": [
-                                                {"text": "item 2.2", "type": "text"}
-                                            ],
-                                        },
-                                        {
-                                            "type": "bulletList",
-                                            "content": [
-                                                {
-                                                    "type": "listItem",
-                                                    "content": [
-                                                        {
-                                                            "type": "paragraph",
-                                                            "content": [
-                                                                {
-                                                                    "text": "item 2.2.1",
-                                                                    "type": "text",
-                                                                }
-                                                            ],
-                                                        }
-                                                    ],
-                                                },
-                                                {
-                                                    "type": "listItem",
-                                                    "content": [
-                                                        {
-                                                            "type": "paragraph",
-                                                            "content": [
-                                                                {
-                                                                    "text": "item 2.2.2",
-                                                                    "type": "text",
-                                                                }
-                                                            ],
-                                                        }
-                                                    ],
-                                                },
-                                            ],
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        }
-        node = NodeBulletList.from_dict(data)
-        # check_seder(node)
-        expected = """
-        - item 1
-        - item 2
-            - item 2.1
-                - item 2.1.1
-                - item 2.1.2
-            - item 2.2
-                - item 2.2.1
-                - item 2.2.2
-        """
-        check_markdown(node, expected)
+    def test_bullet_list_with_nested_structure(self):
+        CaseEnum.bullet_list_with_nested_structure.test()
 
 
 class TestNodeCodeBlock:
-    def test_case_1(self):
-        data = {
-            "type": "codeBlock",
-            "attrs": {"language": "python"},
-            "content": [
-                {"text": "def add_two(a, b):\n    return a + b", "type": "text"}
-            ],
-        }
-        check_seder(NodeCodeBlock.from_dict(data))
+    def test_code_block_none(self):
+        CaseEnum.code_block_none.test()
 
-    def test_case_2(self):
-        data = {
-            "type": "codeBlock",
-        }
-        check_seder(NodeCodeBlock.from_dict(data))
+    def test_code_block_python(self):
+        CaseEnum.code_block_python.test()
+
+    def test_code_block_without_attributes(self):
+        CaseEnum.code_block_without_attributes.test()
 
 
 class TestNodeDate:
-    def test_basic_date_node(self):
-        """Test basic date node creation and conversion."""
-        # Unix timestamp for 2024-01-01 00:00:00 UTC
-        data = {
-            "type": "date",
-            "attrs": {"timestamp": "1704067200000"},  # Note: ADF uses milliseconds
-        }
-        node = NodeDate.from_dict(data)
-        check_seder(node)
-        assert node.to_markdown() == "2024-01-01"
+    def test_date_basic(self):
+        CaseEnum.date_basic.test()
 
     def test_missing_timestamp(self):
-        """Test error handling for missing timestamp."""
+        # Test error handling for missing timestamp.
         data = {"type": "date", "attrs": {}}
         with pytest.raises(ParamError):
             NodeDate.from_dict(data)
 
     def test_invalid_timestamp_format(self):
-        """Test error handling for invalid timestamp format."""
+        # Test error handling for invalid timestamp format.
         data = {"type": "date", "attrs": {"timestamp": "not-a-timestamp"}}
         node = NodeDate.from_dict(data)
         with pytest.raises(ValueError):
             node.to_markdown()
 
     def test_timestamp_conversion(self):
-        """Test various timestamp conversions."""
+        # Test various timestamp conversions.
         test_cases = [
             # (timestamp in ms, expected date string)
             ("0", "1970-01-01"),  # Unix epoch
             ("1704067200000", "2024-01-01"),  # 2024 New Year
             ("1735689600000", "2025-01-01"),  # 2025 New Year
         ]
-
         for timestamp, expected in test_cases:
-            data = {"type": "date", "attrs": {"timestamp": timestamp}}
-            node = NodeDate.from_dict(data)
-            check_seder(node)
-            assert node.to_markdown() == expected
+            case = NodeCase(
+                klass=NodeDate,
+                data={"type": "date", "attrs": {"timestamp": timestamp}},
+                md=expected,
+            )
+            case.test()
 
     def test_very_large_timestamp(self):
-        """Test handling of very large timestamps."""
+        # Test handling of very large timestamps.
         # Year 2100 timestamp
         data = {"type": "date", "attrs": {"timestamp": "4102444800000"}}
         node = NodeDate.from_dict(data)
@@ -580,133 +314,30 @@ class TestNodeDate:
 #
 #
 class TestNodeInlineCard:
-    def test_case_1(self):
-        data = {
-            "type": "inlineCard",
-            "attrs": {
-                "url": "https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/"
-            },
-        }
-        node = NodeInlineCard.from_dict(data)
-        check_seder(node)
-        expected = "[https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/)"
-        check_markdown(node, expected)
+    def test_inline_card_url_to_markdown_link(self):
+        CaseEnum.inline_card_url_to_markdown_link.test()
 
 
 class TestNodeListItem:
-    def test_case_1(self):
-        data = {
-            "type": "listItem",
-            "content": [
-                {
-                    "type": "paragraph",
-                    "content": [{"type": "text", "text": "Hello world"}],
-                }
-            ],
-        }
-        node = NodeListItem.from_dict(data)
-        check_seder(node)
-        expected = "Hello world"
-        check_markdown(node, expected)
+    def test_list_item_with_simple_text(self):
+        CaseEnum.list_item_with_simple_text.test()
 
-    def test_case_2(self):
-        data = {
-            "type": "listItem",
-            "content": [
-                {
-                    "type": "paragraph",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "Bold",
-                            "marks": [{"type": "strong"}],
-                        },
-                        {"type": "text", "text": " and "},
-                        {
-                            "type": "text",
-                            "text": "italic",
-                            "marks": [{"type": "em"}],
-                        },
-                        {"type": "text", "text": " and "},
-                        {
-                            "type": "text",
-                            "text": "code",
-                            "marks": [{"type": "code"}],
-                        },
-                    ],
-                }
-            ],
-        }
-        node = NodeListItem.from_dict(data)
-        check_seder(node)
-        expected = "**Bold** and *italic* and `code`"
-        check_markdown(node, expected)
+    def test_list_item_with_multiple_text_formats(self):
+        CaseEnum.list_item_with_multiple_text_formats.test()
 
 
 class TestNodeMedia:
-    def test_case_1_simple_image(self):
-        data = {
-            "type": "media",
-            "attrs": {
-                "width": 580,
-                "type": "external",
-                "url": "https://www.python.org/static/img/python-logo.png",
-                "height": 164,
-            },
-        }
-        node = NodeMedia.from_dict(data)
-        check_seder(node)
-        expected = "![](https://www.python.org/static/img/python-logo.png)"
-        check_markdown(node, expected)
+    def test_media_external_image_basic_markdown(self):
+        CaseEnum.media_external_image_basic_markdown.test()
 
-    def test_case_2_image_with_alt_text(self):
-        data = {
-            "type": "media",
-            "attrs": {
-                "width": 580,
-                "alt": "Python Logo",
-                "type": "external",
-                "url": "https://www.python.org/static/img/python-logo.png",
-                "height": 164,
-            },
-        }
-        node = NodeMedia.from_dict(data)
-        check_seder(node)
-        expected = "![Python Logo](https://www.python.org/static/img/python-logo.png)"
-        check_markdown(node, expected)
+    def test_media_external_image_with_alt_text(self):
+        CaseEnum.media_external_image_with_alt_text.test()
 
-    def test_case_3_image_with_link(self):
-        data = {
-            "type": "media",
-            "attrs": {
-                "width": 580,
-                "type": "external",
-                "url": "https://www.python.org/static/img/python-logo.png",
-                "height": 164,
-            },
-            "marks": [{"type": "link", "attrs": {"href": "https://www.python.org/"}}],
-        }
-        node = NodeMedia.from_dict(data)
-        check_seder(node)
-        expected = "[![](https://www.python.org/static/img/python-logo.png)](https://www.python.org/)"
-        check_markdown(node, expected)
+    def test_media_external_image_with_hyperlink(self):
+        CaseEnum.media_external_image_with_hyperlink.test()
 
-    def test_case_4_image_with_alt_text_and_link(self):
-        data = {
-            "type": "media",
-            "attrs": {
-                "width": 580,
-                "alt": "Python Logo",
-                "type": "external",
-                "url": "https://www.python.org/static/img/python-logo.png",
-                "height": 164,
-            },
-            "marks": [{"type": "link", "attrs": {"href": "https://www.python.org/"}}],
-        }
-        node = NodeMedia.from_dict(data)
-        check_seder(node)
-        expected = "[![Python Logo](https://www.python.org/static/img/python-logo.png)](https://www.python.org/)"
-        check_markdown(node, expected)
+    def test_media_external_image_with_alt_and_link(self):
+        CaseEnum.media_external_image_with_alt_and_link.test()
 
 
 class TestNodeMediaGroup:
@@ -715,340 +346,44 @@ class TestNodeMediaGroup:
 
 
 class TestNodeMediaSingle:
-    def test_case_1(self):
-        data = {
-            "type": "mediaSingle",
-            "attrs": {"layout": "center", "width": 250, "widthType": "pixel"},
-            "content": [
-                {
-                    "type": "media",
-                    "attrs": {
-                        "width": 580,
-                        "alt": "Python Logo",
-                        "type": "external",
-                        "url": "https://www.python.org/static/img/python-logo.png",
-                        "height": 164,
-                    },
-                    "marks": [
-                        {"type": "link", "attrs": {"href": "https://www.python.org/"}}
-                    ],
-                }
-            ],
-        }
-        node = NodeMediaSingle.from_dict(data)
-        check_seder(node)
-        expected = "[![Python Logo](https://www.python.org/static/img/python-logo.png)](https://www.python.org/)"
-        check_markdown(node, expected)
+    def test_media_single_with_one_image(self):
+        CaseEnum.media_single_with_one_image.test()
 
 
-# class TestNodeMention:
-#     def test(self):
-#         pass
-#
-#
-# class TestNodeNestedExpand:
-#     def test(self):
-#         pass
-#
-#
+class TestNodeMention:
+    def test_mention_basic(self):
+        CaseEnum.mention_basic.test()
+
+
+class TestNodeNestedExpand:
+    def test(self):
+        pass
+
+
 class TestNodeOrderedList:
-    def test_case_1(self):
-        """Test basic ordered list with simple text"""
-        data = {
-            "type": "orderedList",
-            "attrs": {"order": 1},
-            "content": [
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [{"text": "Hello world", "type": "text"}],
-                        }
-                    ],
-                }
-            ],
-        }
-        node = NodeOrderedList.from_dict(data)
-        check_seder(node)
-        expected = "1. Hello world"
-        check_markdown(node, expected)
+    def test_ordered_list_with_single_item(self):
+        CaseEnum.ordered_list_with_single_item.test()
 
-    def test_case_2(self):
-        """Test ordered list with formatted text (bold, italic, code)"""
-        data = {
-            "type": "orderedList",
-            "attrs": {"order": 1},
-            "content": [
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [
-                                {
-                                    "type": "text",
-                                    "text": "Bold",
-                                    "marks": [{"type": "strong"}],
-                                },
-                                {"type": "text", "text": " and "},
-                                {
-                                    "type": "text",
-                                    "text": "italic",
-                                    "marks": [{"type": "em"}],
-                                },
-                                {"type": "text", "text": " and "},
-                                {
-                                    "type": "text",
-                                    "text": "code",
-                                    "marks": [{"type": "code"}],
-                                },
-                            ],
-                        }
-                    ],
-                }
-            ],
-        }
-        node = NodeOrderedList.from_dict(data)
-        check_seder(node)
-        expected = "1. **Bold** and *italic* and `code`"
-        check_markdown(node, expected)
+    def test_ordered_list_with_formatted_text(self):
+        CaseEnum.ordered_list_with_formatted_text.test()
 
-    def test_case_3(self):
-        """Test nested ordered list with multiple levels"""
-        data = {
-            "type": "orderedList",
-            "attrs": {"order": 1},
-            "content": [
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [{"text": "Alice", "type": "text"}],
-                        }
-                    ],
-                },
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [{"text": "Bob", "type": "text"}],
-                        }
-                    ],
-                },
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [{"text": "Cathy", "type": "text"}],
-                        },
-                        {
-                            "type": "orderedList",
-                            "attrs": {"order": 1},
-                            "content": [
-                                {
-                                    "type": "listItem",
-                                    "content": [
-                                        {
-                                            "type": "paragraph",
-                                            "content": [
-                                                {"text": "Cathy 1", "type": "text"}
-                                            ],
-                                        },
-                                        {
-                                            "type": "orderedList",
-                                            "attrs": {"order": 1},
-                                            "content": [
-                                                {
-                                                    "type": "listItem",
-                                                    "content": [
-                                                        {
-                                                            "type": "paragraph",
-                                                            "content": [
-                                                                {
-                                                                    "text": "Cathy 1.1",
-                                                                    "type": "text",
-                                                                }
-                                                            ],
-                                                        }
-                                                    ],
-                                                },
-                                                {
-                                                    "type": "listItem",
-                                                    "content": [
-                                                        {
-                                                            "type": "paragraph",
-                                                            "content": [
-                                                                {
-                                                                    "text": "Cathy 1.2",
-                                                                    "type": "text",
-                                                                }
-                                                            ],
-                                                        }
-                                                    ],
-                                                },
-                                            ],
-                                        },
-                                    ],
-                                },
-                                {
-                                    "type": "listItem",
-                                    "content": [
-                                        {
-                                            "type": "paragraph",
-                                            "content": [
-                                                {"text": "Cathy 2", "type": "text"}
-                                            ],
-                                        },
-                                        {
-                                            "type": "orderedList",
-                                            "attrs": {"order": 1},
-                                            "content": [
-                                                {
-                                                    "type": "listItem",
-                                                    "content": [
-                                                        {
-                                                            "type": "paragraph",
-                                                            "content": [
-                                                                {
-                                                                    "text": "Cathy 2.1",
-                                                                    "type": "text",
-                                                                }
-                                                            ],
-                                                        }
-                                                    ],
-                                                },
-                                                {
-                                                    "type": "listItem",
-                                                    "content": [
-                                                        {
-                                                            "type": "paragraph",
-                                                            "content": [
-                                                                {
-                                                                    "text": "Cathy 2.2",
-                                                                    "type": "text",
-                                                                }
-                                                            ],
-                                                        }
-                                                    ],
-                                                },
-                                            ],
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        }
-        node = NodeOrderedList.from_dict(data)
-        check_seder(node)
-        expected = """
-        1. Alice
-        2. Bob
-        3. Cathy
-            1. Cathy 1
-                1. Cathy 1.1
-                2. Cathy 1.2
-            2. Cathy 2
-                1. Cathy 2.1
-                2. Cathy 2.2
-        """
-        check_markdown(node, expected)
+    def test_ordered_list_with_nested_structure(self):
+        CaseEnum.ordered_list_with_nested_structure.test()
 
-    def test_case_4(self):
-        """Test ordered list with custom starting number"""
-        data = {
-            "type": "orderedList",
-            "attrs": {"order": 5},
-            "content": [
-                {
-                    "type": "listItem",
-                    "content": [
-                        {
-                            "type": "paragraph",
-                            "content": [{"text": "Starting at 5", "type": "text"}],
-                        }
-                    ],
-                }
-            ],
-        }
-        node = NodeOrderedList.from_dict(data)
-        check_seder(node)
-        assert node.to_markdown().strip() == "5. Starting at 5"
+    def test_ordered_list_custom_start_number(self):
+        CaseEnum.ordered_list_custom_start_number.test()
 
 
 class TestNodePanel:
-    def test_basic_panel(self):
-        """Test basic panel with simple text content."""
-        data = {
-            "type": "panel",
-            "attrs": {"panelType": "info"},
-            "content": [
-                {
-                    "type": "paragraph",
-                    "content": [{"type": "text", "text": "Hello world"}],
-                }
-            ],
-        }
-        node = NodePanel.from_dict(data)
-        check_seder(node)
-        # Panel should format with indentation and panel type header
-        expected = """
-        > **INFO**
-        > 
-        > Hello world
-        """
-        check_markdown(node, expected)
+    def test_panel_basic(self):
+        CaseEnum.panel_basic.test()
 
     def test_panel_with_multiple_content_types(self):
-        """Test panel with multiple allowed content types."""
-        data = {
-            "type": "panel",
-            "attrs": {"panelType": "warning"},
-            "content": [
-                {
-                    "type": "heading",
-                    "attrs": {"level": 2},
-                    "content": [{"type": "text", "text": "Warning Title"}],
-                },
-                {
-                    "type": "bulletList",
-                    "content": [
-                        {
-                            "type": "listItem",
-                            "content": [
-                                {
-                                    "type": "paragraph",
-                                    "content": [
-                                        {"type": "text", "text": "List item 1"}
-                                    ],
-                                }
-                            ],
-                        }
-                    ],
-                },
-            ],
-        }
-        node = NodePanel.from_dict(data)
-        check_seder(node)
-        expected = """
-        > **WARNING**
-        > 
-        > ## Warning Title
-        > 
-        > - List item 1
-        """
-        check_markdown(node, expected)
+        CaseEnum.panel_with_multiple_content_types.test()
 
 
 class TestNodeParagraph:
-    def test_case_1(self):
-        """Test basic paragraph with simple text"""
+    def test_paragraph_with_simple_text(self):
         data = {
             "type": "paragraph",
             "content": [{"type": "text", "text": "Hello world"}],
@@ -1060,8 +395,7 @@ class TestNodeParagraph:
         expected = "Hello world"
         check_markdown(node, expected)
 
-    def test_case_2(self):
-        """Test paragraph with no content"""
+    def test_paragraph_without_content(self):
         data = {
             "type": "paragraph",
         }
@@ -1070,8 +404,7 @@ class TestNodeParagraph:
         expected = ""
         check_markdown(node, expected)
 
-    def test_case_3(self):
-        """Test paragraph with multiple text nodes"""
+    def test_paragraph_with_multiple_text_nodes(self):
         data = {
             "type": "paragraph",
             "content": [
@@ -1085,8 +418,7 @@ class TestNodeParagraph:
         expected = "Hello world"
         check_markdown(node, expected)
 
-    def test_case_4(self):
-        """Test paragraph with formatted text (multiple marks)"""
+    def test_paragraph_with_multiple_text_formats(self):
         data = {
             "type": "paragraph",
             "content": [
@@ -1100,8 +432,7 @@ class TestNodeParagraph:
         expected = "**Bold** and *italic*"
         check_markdown(node, expected)
 
-    def test_case_5(self):
-        """Test paragraph with localId attribute"""
+    def test_paragraph_with_local_id(self):
         data = {
             "type": "paragraph",
             "attrs": {"localId": "unique-id-123"},
@@ -1112,8 +443,7 @@ class TestNodeParagraph:
         assert node.to_markdown().strip() == "Hello world"
         assert node.attrs.localId == "unique-id-123"
 
-    def test_case_7(self):
-        """Test paragraph with emoji and mention"""
+    def test_paragraph_with_emoji_and_mention(self):
         data = {
             "type": "paragraph",
             "content": [
@@ -1130,8 +460,7 @@ class TestNodeParagraph:
         expected = "Hello 😊 @user"
         check_markdown(node, expected)
 
-    def test_case_8(self):
-        """Test paragraph with link"""
+    def test_paragraph_with_hyperlink(self):
         data = {
             "type": "paragraph",
             "content": [
@@ -1159,18 +488,23 @@ class TestNodeParagraph:
         check_markdown(node, expected)
 
 
-# class TestNodeRule:
-#     def test(self):
-#         pass
-#
-#
+class TestNodeRule:
+    def test_rule_basic(self):
+        case = NodeCase(
+            klass=NodeRule,
+            data={"type": "rule"},
+            md="---",
+        )
+        case.test()
+
+
 # class TestNodeStatus:
 #     def test(self):
 #         pass
 #
 #
 class TestNodeTable:
-    def test_case_2(self):
+    def test_table_with_complex_nested_content(self):
         data = {
             "type": "table",
             "attrs": {
@@ -1818,7 +1152,7 @@ class TestNodeTable:
         }
         node = NodeTable.from_dict(data)
         check_seder(node)
-        expected = """
+        expected = r"""
         | **Col 1**<br> | **Col 2**<br> |
         | --- | --- |
         | key 1<br>special character \| is not markdown friendly<br> | value 1<br>- this is **Alice**, *Bob*, Cathy, ~~David~~, `Edward`, Frank, George.<br>- This line has titled hyperlink [Atlas Doc Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).<br>- This line has url hyperlink [https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/)<br>- This line has inline hyperlink [https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/) |
@@ -1829,7 +1163,7 @@ class TestNodeTable:
 
 
 class TestNodeTableCell:
-    def test_case_1(self):
+    def test_table_cell_with_escaped_pipe_char(self):
         data = {
             "type": "tableCell",
             "attrs": {"colspan": 1, "rowspan": 1},
@@ -1848,10 +1182,10 @@ class TestNodeTableCell:
         }
         node = NodeTableCell.from_dict(data)
         check_seder(node)
-        expected = "key 1<br>special character \| is not markdown friendly<br>"
+        expected = r"key 1<br>special character \| is not markdown friendly<br>"
         check_markdown(node, expected)
 
-    def test_case_2(self):
+    def test_table_cell_with_bullet_list(self):
         data = {
             "type": "tableCell",
             "attrs": {"colspan": 1, "rowspan": 1},
@@ -1889,7 +1223,7 @@ class TestNodeTableCell:
 
 
 class TestNodeTableHeader:
-    def test_case_1(self):
+    def test_table_header_with_bold_text(self):
         data = {
             "type": "tableHeader",
             "attrs": {"colspan": 1, "rowspan": 1},
@@ -1909,7 +1243,7 @@ class TestNodeTableHeader:
 
 
 class TestNodeTableRow:
-    def test_case_1(self):
+    def test_table_row_with_multiple_cells(self):
         data = {
             "type": "tableRow",
             "content": [
@@ -1969,12 +1303,12 @@ class TestNodeTableRow:
         }
         node = NodeTableRow.from_dict(data)
         check_seder(node)
-        expected = "| key 1<br>special character \| is not markdown friendly<br> | value 1<br>- a<br>- b |"
+        expected = r"| key 1<br>special character \| is not markdown friendly<br> | value 1<br>- a<br>- b |"
         check_markdown(node, expected)
 
 
 class TestNodeTaskItem:
-    def test_basic_task_item(self):
+    def test_task_item_done_and_todo_states(self):
         data = {
             "type": "taskItem",
             "attrs": {"state": "DONE", "localId": "25"},
@@ -1997,7 +1331,7 @@ class TestNodeTaskItem:
 
 
 class TestNodeTaskList:
-    def test_basic_task_list(self):
+    def test_task_list_with_multiple_states(self):
         """Test basic task list with completed and task items."""
         data = {
             "type": "taskList",
@@ -2023,7 +1357,7 @@ class TestNodeTaskList:
         """
         check_markdown(node, expected)
 
-    def test_nested_task_list(self):
+    def test_task_list_with_nested_structure(self):
         data = {
             "type": "taskList",
             "attrs": {"localId": ""},
@@ -2128,19 +1462,80 @@ class TestNodeTaskList:
 
 
 class TestNodeText:
-    def test_case_1(self):
+    def test_text_node_plain_text(self):
         data = {"type": "text", "text": "Hello world"}
         node = NodeText.from_dict(data)
         check_seder(node)
         # Plain text should remain unchanged
         assert node.to_markdown() == "Hello world"
 
-    def test_case_2(self):
+    def test_text_node_missing_text_raises(self):
         data = {"type": "text"}
         with pytest.raises(ParamError):
             NodeText.from_dict(data)
 
-    def test_case_3(self):
+    def test_text_node_with_strong_emphasis(self):
+        data = {"type": "text", "text": "Hello world", "marks": [{"type": "strong"}]}
+        node = NodeText.from_dict(data)
+        check_seder(node)
+        expected = "**Hello world**"
+        check_markdown(node, expected)
+
+    def test_text_node_with_italic(self):
+        data = {"type": "text", "text": "Hello world", "marks": [{"type": "em"}]}
+        node = NodeText.from_dict(data)
+        check_seder(node)
+        # Emphasis should wrap text in asterisks
+        expected = "*Hello world*"
+        check_markdown(node, expected)
+
+    def test_text_node_with_underline(self):
+        data = {"type": "text", "text": "Hello world", "marks": [{"type": "underline"}]}
+        node = NodeText.from_dict(data)
+        check_seder(node)
+        # HTML underline doesn't have standard markdown equivalent, should return plain text
+        expected = "Hello world"
+        check_markdown(node, expected)
+
+    def test_text_node_with_strikethrough(self):
+        data = {"type": "text", "text": "Hello world", "marks": [{"type": "strike"}]}
+        node = NodeText.from_dict(data)
+        check_seder(node)
+        assert node.to_markdown() == "~~Hello world~~"
+
+    def test_text_node_with_code_mark(self):
+        data = {"type": "text", "text": "Hello world", "marks": [{"type": "code"}]}
+        node = NodeText.from_dict(data)
+        check_seder(node)
+        # Code mark should wrap text in backticks
+        expected = "`Hello world`"
+        check_markdown(node, expected)
+
+    def test_text_node_with_subscript(self):
+        data = {
+            "type": "text",
+            "text": "Hello world",
+            "marks": [{"type": "subsup", "attrs": {"type": "sub"}}],
+        }
+        node = NodeText.from_dict(data)
+        check_seder(node)
+        # Subscript doesn't have standard markdown equivalent, should return plain text
+        expected = "Hello world"
+        check_markdown(node, expected)
+
+    def test_text_node_with_text_color(self):
+        data = {
+            "type": "text",
+            "text": "Hello world",
+            "marks": [{"type": "textColor", "attrs": {"color": "#97a0af"}}],
+        }
+        node = NodeText.from_dict(data)
+        check_seder(node)
+        # Text color doesn't have markdown equivalent, should return plain text
+        expected = "Hello world"
+        check_markdown(node, expected)
+
+    def test_text_node_with_background_color(self):
         data = {
             "type": "text",
             "text": "Hello world",
@@ -2152,23 +1547,7 @@ class TestNodeText:
         expected = "Hello world"
         check_markdown(node, expected)
 
-    def test_case_4(self):
-        data = {"type": "text", "text": "Hello world", "marks": [{"type": "code"}]}
-        node = NodeText.from_dict(data)
-        check_seder(node)
-        # Code mark should wrap text in backticks
-        expected = "`Hello world`"
-        check_markdown(node, expected)
-
-    def test_case_5(self):
-        data = {"type": "text", "text": "Hello world", "marks": [{"type": "em"}]}
-        node = NodeText.from_dict(data)
-        check_seder(node)
-        # Emphasis should wrap text in asterisks
-        expected = "*Hello world*"
-        check_markdown(node, expected)
-
-    def test_case_6_titled_hyperlink(self):
+    def test_text_node_with_titled_hyperlink(self):
         data = {
             "text": "Atlas Doc Format",
             "type": "text",
@@ -2186,7 +1565,7 @@ class TestNodeText:
         expected = "[Atlas Doc Format](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/)"
         check_markdown(node, expected)
 
-    def test_case_6_url_hyperlink(self):
+    def test_text_node_with_url_hyperlink(self):
         data = {
             "text": "https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/",
             "type": "text",
@@ -2202,51 +1581,6 @@ class TestNodeText:
         node = NodeText.from_dict(data)
         check_seder(node)
         expected = "[https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/)"
-        check_markdown(node, expected)
-
-    def test_case_7(self):
-        data = {"type": "text", "text": "Hello world", "marks": [{"type": "strike"}]}
-        node = NodeText.from_dict(data)
-        check_seder(node)
-        assert node.to_markdown() == "~~Hello world~~"
-
-    def test_case_8(self):
-        data = {"type": "text", "text": "Hello world", "marks": [{"type": "strong"}]}
-        node = NodeText.from_dict(data)
-        check_seder(node)
-        expected = "**Hello world**"
-        check_markdown(node, expected)
-
-    def test_case_9(self):
-        data = {
-            "type": "text",
-            "text": "Hello world",
-            "marks": [{"type": "subsup", "attrs": {"type": "sub"}}],
-        }
-        node = NodeText.from_dict(data)
-        check_seder(node)
-        # Subscript doesn't have standard markdown equivalent, should return plain text
-        expected = "Hello world"
-        check_markdown(node, expected)
-
-    def test_case_10(self):
-        data = {
-            "type": "text",
-            "text": "Hello world",
-            "marks": [{"type": "textColor", "attrs": {"color": "#97a0af"}}],
-        }
-        node = NodeText.from_dict(data)
-        check_seder(node)
-        # Text color doesn't have markdown equivalent, should return plain text
-        expected = "Hello world"
-        check_markdown(node, expected)
-
-    def test_case_11(self):
-        data = {"type": "text", "text": "Hello world", "marks": [{"type": "underline"}]}
-        node = NodeText.from_dict(data)
-        check_seder(node)
-        # HTML underline doesn't have standard markdown equivalent, should return plain text
-        expected = "Hello world"
         check_markdown(node, expected)
 
 
