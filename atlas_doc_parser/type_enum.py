@@ -6,6 +6,7 @@ import enum
 class TypeEnum(enum.Enum):
     annotation = "annotation"
     backgroundColor = "backgroundColor"
+    blockCard = "blockCard"
     blockquote = "blockquote"
     border = "border"
     bulletList = "bulletList"

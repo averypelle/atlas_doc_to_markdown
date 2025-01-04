@@ -1,5 +1,1 @@
 We manually maintain a `real Confluence page <https://sanhehu.atlassian.net/wiki/spaces/JWBMT/pages/294223873/Atlassian+Document+Format+Parser+Test>`_ (Confluence Cloud version) and try to include as much syntax and as many macros as possible for unit tests.
-
-Scripts in this folder are used to extract examples from that Confluence page and save them into a JSON file.
-
-- ``step1_get_examples.py``: extract examples from Confluence page and save them into a JSON file.

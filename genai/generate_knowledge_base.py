@@ -122,6 +122,27 @@ def generate_document_knowledge_base():
         path_out.write_text(path.read_text())
 
 
+def copy_atlassian_document_format_reference():
+    path_in = dir_project_root.joinpath(
+        "scripts", "crawl_atlas_doc_reference", "Atlassian-Document-Format-Reference.md"
+    )
+    if path_in.exists():
+        path_out = dir_out.joinpath(path_in.name)
+        path_out.write_text(path_in.read_text())
+
+
+def copy_unit_test_data_reference():
+    path_in = dir_project_root.joinpath(
+        "scripts",
+        "download_unit_test_data",
+        "tmp",
+        "Atlassian Document Format Parser Unit Test Data.json",
+    )
+    if path_in.exists():
+        path_out = dir_out.joinpath(path_in.name)
+        path_out.write_text(path_in.read_text())
+
+
 dir_out = dir_here / "tmp"
 reset_dir_out(dir_out)
 dir_project_root = dir_here.parent
@@ -151,3 +172,6 @@ generate_test_cases_knowledge_base(
 )
 
 generate_document_knowledge_base()
+
+copy_atlassian_document_format_reference()
+copy_unit_test_data_reference()

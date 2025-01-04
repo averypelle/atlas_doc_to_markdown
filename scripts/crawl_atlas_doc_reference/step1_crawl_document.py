@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import json
-import time
+"""
+把 https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/
+中的所有文档的 HTML 页面下载下来, 保存到 tmp 目录下.
+"""
+
 import shutil
 from pathlib import Path
 
-from rich import print as rprint
 import requests
 from bs4 import BeautifulSoup
 from diskcache import Cache
@@ -49,6 +51,9 @@ def get_html_by_url_with_cache(
 
 
 def extract_the_main_div(soup: BeautifulSoup) -> BeautifulSoup:
+    """
+    从文档页面中找到关键文档所在的 div, 剔除无关元素.
+    """
     found_div = None
     for div in soup.find_all("div"):
         for child in div.children:
@@ -65,7 +70,6 @@ def extract_the_main_div(soup: BeautifulSoup) -> BeautifulSoup:
 def write_webpage(div: BeautifulSoup, title: str):
     path = dir_tmp.joinpath(f"{title}.html")
     text = str(div.prettify())
-    # text = div.text
     path.write_text(text)
 
 
@@ -79,6 +83,7 @@ def main():
     main_div = extract_the_main_div(soup)
     write_webpage(main_div, "Atlassian Document Format")
 
+    # 找到左边导航栏的所有链接
     div = soup.find("div", class_="sideNavLinksScrollable")
     for a in div.find_all("a"):
         href = a["href"]

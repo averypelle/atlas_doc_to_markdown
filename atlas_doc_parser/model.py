@@ -179,18 +179,18 @@ class BaseNode(Base):
                 new_content = list()
                 for d in dct["content"]:
                     # print(f"{d = }")  # for debug only
-                    # impl 1. use try except
-                    # try:
-                    #     content = parse_node(d)
-                    #     new_content.append(content)
-                    # except Exception as e:
-                    #     if ignore_error:
-                    #         pass
-                    #     else:
-                    #         raise e
-                    # impl 2. no try except, for debug only
-                    content = parse_node(d)
-                    new_content.append(content)
+                    # --- impl 1. use try except
+                    try:
+                        content = parse_node(d)
+                        new_content.append(content)
+                    except Exception as e:
+                        if ignore_error:
+                            pass
+                        else:
+                            raise e
+                    # --- impl 2. no try except, for debug only
+                    # content = parse_node(d)
+                    # new_content.append(content)
 
                 dct["content"] = new_content
 
@@ -275,6 +275,31 @@ def _doc_content_to_markdown(
 
     md = _strip_double_empty_line(concat.join(lst))
     return md
+
+
+def _add_style_to_markdown(md: str, node: "T_NODE") -> str:
+    if isinstance(node.marks, list):
+        for mark in node.marks:
+            md = mark.to_markdown(md)
+    return md
+
+
+@dataclasses.dataclass
+class NodeBlockCardAttrs(Base):
+    url: str = dataclasses.field(default_factory=NA)
+    data: T_DATA_LIKE = dataclasses.field(default_factory=NA)
+
+
+@dataclasses.dataclass
+class NodeBlockCard(BaseNode):
+    type: str = dataclasses.field(default=TypeEnum.blockCard.value)
+    attrs: NodeBlockCardAttrs = dataclasses.field(default_factory=REQ)
+
+    def to_markdown(self) -> str:
+        if isinstance(self.attrs.url, str):
+            return f"[{self.attrs.url}]({self.attrs.url})"
+        else:
+            raise NotImplementedError
 
 
 @dataclasses.dataclass
@@ -377,7 +402,7 @@ class NodeDate(BaseNode):
 class NodeDoc(BaseNode):
     version: int = dataclasses.field(default=1)
     type: str = dataclasses.field(default=TypeEnum.doc.value)
-    content: list["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self) -> str:
         md = _doc_content_to_markdown(self.content)
@@ -412,8 +437,8 @@ class NodeExpandAttrs(Base):
 class NodeExpand(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.expand.value)
     attrs: NodeExpandAttrs = dataclasses.field(default_factory=REQ)
-    content: list["T_NODE"] = dataclasses.field(default=REQ)
-    marks: T.List["T_MARK"] = dataclasses.field(default=NA)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
+    marks: T.List["T_MARK"] = dataclasses.field(default_factory=NA)
 
     def to_markdown(self) -> str:
         return _doc_content_to_markdown(self.content)
@@ -434,7 +459,7 @@ class NodeHeadingAttrs(Base):
 class NodeHeading(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.heading.value)
     attrs: NodeHeadingAttrs = dataclasses.field(default_factory=REQ)
-    content: list["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self) -> str:
         """
@@ -453,7 +478,8 @@ class NodeHeading(BaseNode):
 
 @dataclasses.dataclass
 class NodeInlineCardAttrs(Base):
-    url: str = dataclasses.field(default_factory=REQ)
+    url: str = dataclasses.field(default_factory=NA)
+    data: T_DATA_LIKE = dataclasses.field(default_factory=NA)
 
 
 @dataclasses.dataclass
@@ -461,40 +487,76 @@ class NodeInlineCard(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.inlineCard.value)
     attrs: NodeInlineCardAttrs = dataclasses.field(default_factory=REQ)
 
+    def to_markdown(self) -> str:
+        if isinstance(self.attrs.url, str):
+            return f"[{self.attrs.url}]({self.attrs.url})"
+        else:
+            raise NotImplementedError
+
 
 @dataclasses.dataclass
 class NodeListItem(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.listItem.value)
-    content: list["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self) -> str:
         return _content_to_markdown(self.content)
 
 
+T_NODE_MEDIA_ATTRS_TYPE = T.Literal["file", "link", "external"]
+
+
 @dataclasses.dataclass
 class NodeMediaAttrs(Base):
     id: str = dataclasses.field(default_factory=NA)
-    type: str = dataclasses.field(default_factory=REQ)
+    type: T_NODE_MEDIA_ATTRS_TYPE = dataclasses.field(default_factory=REQ)
     collection: str = dataclasses.field(default_factory=NA)
     width: int = dataclasses.field(default_factory=NA)
     height: int = dataclasses.field(default_factory=NA)
+    url: str = dataclasses.field(default_factory=NA)
+    alt: str = dataclasses.field(default_factory=NA)
     occurrenceKey: int = dataclasses.field(default_factory=NA)
+
+    def is_file_type(self) -> bool:
+        return self.type == "file"
+
+    def is_link_type(self) -> bool:
+        return self.type == "link"
+
+    def is_external_type(self) -> bool:
+        return self.type == "external"
 
 
 @dataclasses.dataclass
 class NodeMedia(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.media.value)
     attrs: NodeMediaAttrs = dataclasses.field(default_factory=REQ)
-    marks: T.List["T_MARK"] = dataclasses.field(default=NA)
+    marks: T.List["T_MARK"] = dataclasses.field(default_factory=NA)
 
     def to_markdown(self) -> str:
-        return ""
+        if isinstance(self.attrs.alt, str):
+            alt = self.attrs.alt
+        else:
+            alt = ""
+
+        if self.attrs.is_file_type():
+            raise NotImplementedError
+        elif self.attrs.is_link_type():
+            raise NotImplementedError
+        elif self.attrs.is_external_type():
+            if isinstance(self.attrs.url, str):
+                md = f"![{alt}]({self.attrs.url})"
+                return _add_style_to_markdown(md, self)
+            else:
+                raise NotImplementedError
+        else:  # pragma: no cover
+            raise TypeError
 
 
 @dataclasses.dataclass
 class NodeMediaGroup(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.mediaGroup.value)
-    content: list["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self) -> str:
         return ""
@@ -511,7 +573,7 @@ class NodeMediaSingleAttrs(Base):
 class NodeMediaSingle(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.mediaSingle.value)
     attrs: NodeMediaSingleAttrs = dataclasses.field(default_factory=REQ)
-    content: list["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self) -> str:
         return _content_to_markdown(self.content)
@@ -546,7 +608,7 @@ class NodeNestedExpandAttrs(Base):
 class NodeNestedExpand(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.nestedExpand.value)
     attrs: NodeNestedExpandAttrs = dataclasses.field(default_factory=NA)
-    content: list["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
 
 @dataclasses.dataclass
@@ -558,7 +620,7 @@ class NodeOrderedListAttrs(Base):
 class NodeOrderedList(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.orderedList.value)
     attrs: NodeOrderedListAttrs = dataclasses.field(default_factory=NA)
-    content: list["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
     def to_markdown(
         self,
@@ -612,7 +674,7 @@ class NodePanelAttrs(Base):
 class NodePanel(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.panel.value)
     attrs: NodePanelAttrs = dataclasses.field(default_factory=REQ)
-    content: list["T_NODE"] = dataclasses.field(default=REQ)
+    content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
     def to_markdown(self) -> str:
         return (
@@ -673,23 +735,80 @@ class NodeStatus(BaseNode):
 
 
 @dataclasses.dataclass
+class NodeTableAttrs(Base):
+    isNumberColumnEnabled: bool = dataclasses.field(default_factory=NA)
+    width: float = dataclasses.field(default=NA)
+    layout: str = dataclasses.field(default_factory=NA)
+    displayMode: str = dataclasses.field(default_factory=NA)
+
+
+@dataclasses.dataclass
 class NodeTable(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.table.value)
+    attrs: NodeTableAttrs = dataclasses.field(default_factory=NA)
+    content: list["NodeTableRow"] = dataclasses.field(default_factory=REQ)
+
+    def to_markdown(self) -> str:
+        lines = list()
+        for row in self.content:
+            lines.append(row.to_markdown())
+            if isinstance(row.content[0], NodeTableHeader):
+                lines.append("| " + " | ".join(["---"] * len(row.content)) + " |")
+        return "\n".join(lines)
+
+
+@dataclasses.dataclass
+class NodeTableCellAttrs(Base):
+    background: str = dataclasses.field(default_factory=NA)
+    colspan: str = dataclasses.field(default=NA)
+    colwidth: str = dataclasses.field(default_factory=NA)
+    rowspan: str = dataclasses.field(default_factory=NA)
 
 
 @dataclasses.dataclass
 class NodeTableCell(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.tableCell.value)
+    attrs: NodeTableCellAttrs = dataclasses.field(default_factory=NA)
+    content: list["T_NODE"] = dataclasses.field(default_factory=NA)
+
+    def to_markdown(self) -> str:
+        md = _content_to_markdown(self.content)
+        md = md.replace("|", "\\|").replace("\n", "<br>")
+        return md
+
+
+@dataclasses.dataclass
+class NodeTableHeaderAttrs(Base):
+    background: str = dataclasses.field(default_factory=NA)
+    colspan: str = dataclasses.field(default=NA)
+    colwidth: str = dataclasses.field(default_factory=NA)
+    rowspan: str = dataclasses.field(default_factory=NA)
 
 
 @dataclasses.dataclass
 class NodeTableHeader(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.tableHeader.value)
+    attrs: NodeTableHeaderAttrs = dataclasses.field(default_factory=NA)
+    content: list["T_NODE"] = dataclasses.field(default_factory=NA)
+
+    def to_markdown(self) -> str:
+        md = _content_to_markdown(self.content)
+        md = md.replace("|", "\\|").replace("\n", "<br>")
+        return md
 
 
 @dataclasses.dataclass
 class NodeTableRow(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.tableRow.value)
+    content: list[T.Union["NodeTableHeader", "NodeTableCell"]] = dataclasses.field(
+        default_factory=REQ
+    )
+
+    def to_markdown(self) -> str:
+        cells = []
+        for cell in self.content:
+            cells.append(cell.to_markdown())
+        return "| " + " | ".join(cells) + " |"
 
 
 @dataclasses.dataclass
@@ -769,13 +888,12 @@ class NodeText(BaseNode):
 
     def to_markdown(self):
         md = self.text
-        if isinstance(self.marks, list):
-            for mark in self.marks:
-                md = mark.to_markdown(md)
+        md = _add_style_to_markdown(md, self)
         return md
 
 
 _node_type_to_class_mapping = {
+    TypeEnum.blockCard.value: NodeBlockCard,
     TypeEnum.blockquote.value: NodeBlockQuote,
     TypeEnum.bulletList.value: NodeBulletList,
     TypeEnum.codeBlock.value: NodeCodeBlock,
