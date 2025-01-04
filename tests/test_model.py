@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import textwrap
 
 import pytest
@@ -40,10 +41,12 @@ from atlas_doc_parser.model import (
     NodeTableCell,
     NodeTableHeader,
     NodeTableRow,
+    NodeTaskItem,
+    NodeTaskList,
     NodeText,
     parse_node,
 )
-from atlas_doc_parser.tests import check_seder
+from atlas_doc_parser.tests import check_seder, check_markdown
 
 
 class TestMarkBackGroundColor:
@@ -233,8 +236,8 @@ class TestNodeBulletList:
         assert isinstance(node_text, NodeText)
 
         check_seder(node)
-
-        assert node.to_markdown() == "- Hello world"
+        expected = "- Hello world"
+        check_markdown(node, expected)
 
     def test_case_2(self):
         # Test case 2: Bullet list with formatted text (bold, italic, code)
@@ -272,7 +275,8 @@ class TestNodeBulletList:
         }
         node = NodeBulletList.from_dict(data)
         check_seder(node)
-        assert node.to_markdown() == "- **Bold** and *italic* and `code`"
+        expected = "- **Bold** and *italic* and `code`"
+        check_markdown(node, expected)
 
     def test_case_3(self):
         # Test case 3: Multiple bullet points with links and mixed formatting
@@ -329,17 +333,11 @@ class TestNodeBulletList:
         }
         node = NodeBulletList.from_dict(data)
         check_seder(node)
-        expected = textwrap.dedent(
-            """
+        expected = """
         - Visit [Atlassian](http://atlassian.com)
         - This is ~~strikethrough~~
         """
-        ).strip()
-        # print([node.to_markdown().strip()])  # for debug only
-        # print([expected])  # for debug only
-        # print(node.to_markdown().strip())  # for debug only
-        # print(expected)
-        assert node.to_markdown().strip() == expected
+        check_markdown(node, expected)
 
     def test_case_4(self):
         data = {
@@ -460,8 +458,7 @@ class TestNodeBulletList:
         }
         node = NodeBulletList.from_dict(data)
         check_seder(node)
-        expected = textwrap.dedent(
-            """
+        expected = """
         - item 1
         - item 2
             - item 2.1
@@ -471,12 +468,7 @@ class TestNodeBulletList:
                 - item 2.2.1
                 - item 2.2.2
         """
-        ).strip()
-        # print([node.to_markdown().strip()])  # for debug only
-        # print([expected])  # for debug only
-        # print(node.to_markdown().strip())  # for debug only
-        # print(expected)  # for debug only
-        assert node.to_markdown().strip() == expected
+        check_markdown(node, expected)
 
 
 class TestNodeCodeBlock:
@@ -606,11 +598,237 @@ class TestNodeDate:
 #         pass
 #
 #
-# class TestNodeOrderedList:
-#     def test(self):
-#         pass
-#
-#
+class TestNodeOrderedList:
+    def test_case_1(self):
+        """Test basic ordered list with simple text"""
+        data = {
+            "type": "orderedList",
+            "attrs": {"order": 1},
+            "content": [
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"text": "Hello world", "type": "text"}],
+                        }
+                    ],
+                }
+            ],
+        }
+        node = NodeOrderedList.from_dict(data)
+        check_seder(node)
+        expected = "1. Hello world"
+        check_markdown(node, expected)
+
+    def test_case_2(self):
+        """Test ordered list with formatted text (bold, italic, code)"""
+        data = {
+            "type": "orderedList",
+            "attrs": {"order": 1},
+            "content": [
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": "Bold",
+                                    "marks": [{"type": "strong"}],
+                                },
+                                {"type": "text", "text": " and "},
+                                {
+                                    "type": "text",
+                                    "text": "italic",
+                                    "marks": [{"type": "em"}],
+                                },
+                                {"type": "text", "text": " and "},
+                                {
+                                    "type": "text",
+                                    "text": "code",
+                                    "marks": [{"type": "code"}],
+                                },
+                            ],
+                        }
+                    ],
+                }
+            ],
+        }
+        node = NodeOrderedList.from_dict(data)
+        check_seder(node)
+        expected = "1. **Bold** and *italic* and `code`"
+        check_markdown(node, expected)
+
+    def test_case_3(self):
+        """Test nested ordered list with multiple levels"""
+        data = {
+            "type": "orderedList",
+            "attrs": {"order": 1},
+            "content": [
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"text": "Alice", "type": "text"}],
+                        }
+                    ],
+                },
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"text": "Bob", "type": "text"}],
+                        }
+                    ],
+                },
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"text": "Cathy", "type": "text"}],
+                        },
+                        {
+                            "type": "orderedList",
+                            "attrs": {"order": 1},
+                            "content": [
+                                {
+                                    "type": "listItem",
+                                    "content": [
+                                        {
+                                            "type": "paragraph",
+                                            "content": [
+                                                {"text": "Cathy 1", "type": "text"}
+                                            ],
+                                        },
+                                        {
+                                            "type": "orderedList",
+                                            "attrs": {"order": 1},
+                                            "content": [
+                                                {
+                                                    "type": "listItem",
+                                                    "content": [
+                                                        {
+                                                            "type": "paragraph",
+                                                            "content": [
+                                                                {
+                                                                    "text": "Cathy 1.1",
+                                                                    "type": "text",
+                                                                }
+                                                            ],
+                                                        }
+                                                    ],
+                                                },
+                                                {
+                                                    "type": "listItem",
+                                                    "content": [
+                                                        {
+                                                            "type": "paragraph",
+                                                            "content": [
+                                                                {
+                                                                    "text": "Cathy 1.2",
+                                                                    "type": "text",
+                                                                }
+                                                            ],
+                                                        }
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    "type": "listItem",
+                                    "content": [
+                                        {
+                                            "type": "paragraph",
+                                            "content": [
+                                                {"text": "Cathy 2", "type": "text"}
+                                            ],
+                                        },
+                                        {
+                                            "type": "orderedList",
+                                            "attrs": {"order": 1},
+                                            "content": [
+                                                {
+                                                    "type": "listItem",
+                                                    "content": [
+                                                        {
+                                                            "type": "paragraph",
+                                                            "content": [
+                                                                {
+                                                                    "text": "Cathy 2.1",
+                                                                    "type": "text",
+                                                                }
+                                                            ],
+                                                        }
+                                                    ],
+                                                },
+                                                {
+                                                    "type": "listItem",
+                                                    "content": [
+                                                        {
+                                                            "type": "paragraph",
+                                                            "content": [
+                                                                {
+                                                                    "text": "Cathy 2.2",
+                                                                    "type": "text",
+                                                                }
+                                                            ],
+                                                        }
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+        node = NodeOrderedList.from_dict(data)
+        check_seder(node)
+        expected = """
+        1. Alice
+        2. Bob
+        3. Cathy
+            1. Cathy 1
+                1. Cathy 1.1
+                2. Cathy 1.2
+            2. Cathy 2
+                1. Cathy 2.1
+                2. Cathy 2.2
+        """
+        check_markdown(node, expected)
+
+    def test_case_4(self):
+        """Test ordered list with custom starting number"""
+        data = {
+            "type": "orderedList",
+            "attrs": {"order": 5},
+            "content": [
+                {
+                    "type": "listItem",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"text": "Starting at 5", "type": "text"}],
+                        }
+                    ],
+                }
+            ],
+        }
+        node = NodeOrderedList.from_dict(data)
+        check_seder(node)
+        assert node.to_markdown().strip() == "5. Starting at 5"
+
+
 class TestNodePanel:
     def test_basic_panel(self):
         """Test basic panel with simple text content."""
@@ -627,18 +845,12 @@ class TestNodePanel:
         node = NodePanel.from_dict(data)
         check_seder(node)
         # Panel should format with indentation and panel type header
-        expected = textwrap.dedent(
-            """
+        expected = """
         > **INFO**
         > 
         > Hello world
         """
-        ).strip()
-        # print([node.to_markdown().strip()])  # for debug only
-        # print([expected])  # for debug only
-        # print(node.to_markdown().strip())  # for debug only
-        # print(expected)  # for debug only
-        assert node.to_markdown().strip() == expected
+        check_markdown(node, expected)
 
     def test_panel_with_multiple_content_types(self):
         """Test panel with multiple allowed content types."""
@@ -671,20 +883,14 @@ class TestNodePanel:
         }
         node = NodePanel.from_dict(data)
         check_seder(node)
-        expected = textwrap.dedent(
-            """
+        expected = """
         > **WARNING**
         > 
         > ## Warning Title
         > 
         > - List item 1
         """
-        ).strip()
-        # print([node.to_markdown().strip()])  # for debug only
-        # print([expected])  # for debug only
-        # print(node.to_markdown().strip())  # for debug only
-        # print(expected)  # for debug only
-        assert node.to_markdown().strip() == expected
+        check_markdown(node, expected)
 
 
 class TestNodeParagraph:
@@ -698,8 +904,8 @@ class TestNodeParagraph:
         assert node.to_dict() == data
 
         check_seder(node)
-
-        assert node.to_markdown().strip() == "Hello world"
+        expected = "Hello world"
+        check_markdown(node, expected)
 
     def test_case_2(self):
         """Test paragraph with no content"""
@@ -708,7 +914,8 @@ class TestNodeParagraph:
         }
         node = NodeParagraph.from_dict(data)
         check_seder(node)
-        assert node.to_markdown().strip() == ""
+        expected = ""
+        check_markdown(node, expected)
 
     def test_case_3(self):
         """Test paragraph with multiple text nodes"""
@@ -722,7 +929,8 @@ class TestNodeParagraph:
         }
         node = NodeParagraph.from_dict(data)
         check_seder(node)
-        assert node.to_markdown().strip() == "Hello world"
+        expected = "Hello world"
+        check_markdown(node, expected)
 
     def test_case_4(self):
         """Test paragraph with formatted text (multiple marks)"""
@@ -736,7 +944,8 @@ class TestNodeParagraph:
         }
         node = NodeParagraph.from_dict(data)
         check_seder(node)
-        assert node.to_markdown().strip() == "**Bold** and *italic*"
+        expected = "**Bold** and *italic*"
+        check_markdown(node, expected)
 
     def test_case_5(self):
         """Test paragraph with localId attribute"""
@@ -765,7 +974,8 @@ class TestNodeParagraph:
         check_seder(node)
         # The exact output will depend on how emoji and mention are implemented
         # in their respective to_markdown() methods
-        assert node.to_markdown().strip() == "Hello 😊 @user"
+        expected = "Hello 😊 @user"
+        check_markdown(node, expected)
 
     def test_case_8(self):
         """Test paragraph with link"""
@@ -792,7 +1002,8 @@ class TestNodeParagraph:
         }
         node = NodeParagraph.from_dict(data)
         check_seder(node)
-        assert node.to_markdown() == "Visit us at [HERE](https://example.com)\n"
+        expected = "Visit us at [HERE](https://example.com)"
+        check_markdown(node, expected)
 
 
 # class TestNodeRule:
@@ -824,7 +1035,162 @@ class TestNodeParagraph:
 #     def test(self):
 #         pass
 #
-#
+
+
+class TestNodeTaskItem:
+    def test_basic_task_item(self):
+        data = {
+            "type": "taskItem",
+            "attrs": {"state": "DONE", "localId": "25"},
+            "content": [{"text": "Do this", "type": "text"}],
+        }
+        node = NodeTaskItem.from_dict(data)
+        check_seder(node)
+        expected = "[x] Do this"
+        check_markdown(node, expected)
+
+        data = {
+            "type": "taskItem",
+            "attrs": {"state": "TODO", "localId": "26"},
+            "content": [{"text": "And do this", "type": "text"}],
+        }
+        node = NodeTaskItem.from_dict(data)
+        check_seder(node)
+        expected = "[ ] And do this"
+        check_markdown(node, expected)
+
+
+class TestNodeTaskList:
+    def test_basic_task_list(self):
+        """Test basic task list with completed and task items."""
+        data = {
+            "type": "taskList",
+            "attrs": {"localId": ""},
+            "content": [
+                {
+                    "type": "taskItem",
+                    "attrs": {"state": "DONE", "localId": "25"},
+                    "content": [{"text": "Do this", "type": "text"}],
+                },
+                {
+                    "type": "taskItem",
+                    "attrs": {"state": "TODO", "localId": "26"},
+                    "content": [{"text": "And do this", "type": "text"}],
+                },
+            ],
+        }
+        node = NodeTaskList.from_dict(data)
+        check_seder(node)
+        expected = """
+        - [x] Do this
+        - [ ] And do this
+        """
+        check_markdown(node, expected)
+
+    def test_nested_task_list(self):
+        data = {
+            "type": "taskList",
+            "attrs": {"localId": ""},
+            "content": [
+                {
+                    "type": "taskItem",
+                    "attrs": {"state": "DONE", "localId": "25"},
+                    "content": [{"text": "Do this", "type": "text"}],
+                },
+                {
+                    "type": "taskItem",
+                    "attrs": {"state": "TODO", "localId": "26"},
+                    "content": [{"text": "And do this", "type": "text"}],
+                },
+                {
+                    "type": "taskList",
+                    "attrs": {"localId": ""},
+                    "content": [
+                        {
+                            "type": "taskItem",
+                            "attrs": {"state": "TODO", "localId": "27"},
+                            "content": [
+                                {"text": "sub ", "type": "text"},
+                                {
+                                    "text": "task 1",
+                                    "type": "text",
+                                    "marks": [{"type": "code"}],
+                                },
+                            ],
+                        },
+                        {
+                            "type": "taskList",
+                            "attrs": {"localId": ""},
+                            "content": [
+                                {
+                                    "type": "taskItem",
+                                    "attrs": {"state": "DONE", "localId": "28"},
+                                    "content": [
+                                        {"text": "sub task 1.1", "type": "text"}
+                                    ],
+                                },
+                                {
+                                    "type": "taskItem",
+                                    "attrs": {"state": "TODO", "localId": "29"},
+                                    "content": [
+                                        {"text": "sub task 1.2", "type": "text"}
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            "type": "taskItem",
+                            "attrs": {"state": "TODO", "localId": "30"},
+                            "content": [
+                                {"text": "sub ", "type": "text"},
+                                {
+                                    "text": "task 2",
+                                    "type": "text",
+                                    "marks": [{"type": "strong"}],
+                                },
+                            ],
+                        },
+                        {
+                            "type": "taskList",
+                            "attrs": {"localId": ""},
+                            "content": [
+                                {
+                                    "type": "taskItem",
+                                    "attrs": {"state": "TODO", "localId": "31"},
+                                    "content": [
+                                        {"text": "sub task 2.1", "type": "text"}
+                                    ],
+                                },
+                                {
+                                    "type": "taskItem",
+                                    "attrs": {"state": "DONE", "localId": "32"},
+                                    "content": [
+                                        {"text": "sub task 2.2", "type": "text"}
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+        node = NodeTaskList.from_dict(data)
+        check_seder(node)
+        expected = textwrap.dedent(
+            """
+            - [x] Do this
+            - [ ] And do this
+                - [ ] sub `task 1`
+                    - [x] sub task 1.1
+                    - [ ] sub task 1.2
+                - [ ] sub **task 2**
+                    - [ ] sub task 2.1
+                    - [x] sub task 2.2
+            """
+        )
+        check_markdown(node, expected)
+
+
 class TestNodeText:
     def test_case_1(self):
         data = {"type": "text", "text": "Hello world"}
@@ -847,21 +1213,24 @@ class TestNodeText:
         node = NodeText.from_dict(data)
         check_seder(node)
         # Background color doesn't have markdown equivalent, should return plain text
-        assert node.to_markdown() == "Hello world"
+        expected = "Hello world"
+        check_markdown(node, expected)
 
     def test_case_4(self):
         data = {"type": "text", "text": "Hello world", "marks": [{"type": "code"}]}
         node = NodeText.from_dict(data)
         check_seder(node)
         # Code mark should wrap text in backticks
-        assert node.to_markdown() == "`Hello world`"
+        expected = "`Hello world`"
+        check_markdown(node, expected)
 
     def test_case_5(self):
         data = {"type": "text", "text": "Hello world", "marks": [{"type": "em"}]}
         node = NodeText.from_dict(data)
         check_seder(node)
         # Emphasis should wrap text in asterisks
-        assert node.to_markdown() == "*Hello world*"
+        expected = "*Hello world*"
+        check_markdown(node, expected)
 
     def test_case_6(self):
         data = {
@@ -876,7 +1245,8 @@ class TestNodeText:
         }
         node = NodeText.from_dict(data)
         check_seder(node)
-        assert node.to_markdown() == "[Atlassian](http://atlassian.com)"
+        expected = "[Atlassian](http://atlassian.com)"
+        check_markdown(node, expected)
 
     def test_case_7(self):
         data = {"type": "text", "text": "Hello world", "marks": [{"type": "strike"}]}
@@ -888,7 +1258,8 @@ class TestNodeText:
         data = {"type": "text", "text": "Hello world", "marks": [{"type": "strong"}]}
         node = NodeText.from_dict(data)
         check_seder(node)
-        assert node.to_markdown() == "**Hello world**"
+        expected = "**Hello world**"
+        check_markdown(node, expected)
 
     def test_case_9(self):
         data = {
@@ -899,7 +1270,8 @@ class TestNodeText:
         node = NodeText.from_dict(data)
         check_seder(node)
         # Subscript doesn't have standard markdown equivalent, should return plain text
-        assert node.to_markdown() == "Hello world"
+        expected = "Hello world"
+        check_markdown(node, expected)
 
     def test_case_10(self):
         data = {
@@ -910,14 +1282,16 @@ class TestNodeText:
         node = NodeText.from_dict(data)
         check_seder(node)
         # Text color doesn't have markdown equivalent, should return plain text
-        assert node.to_markdown() == "Hello world"
+        expected = "Hello world"
+        check_markdown(node, expected)
 
     def test_case_11(self):
         data = {"type": "text", "text": "Hello world", "marks": [{"type": "underline"}]}
         node = NodeText.from_dict(data)
         check_seder(node)
         # HTML underline doesn't have standard markdown equivalent, should return plain text
-        assert node.to_markdown() == "Hello world"
+        expected = "Hello world"
+        check_markdown(node, expected)
 
 
 if __name__ == "__main__":

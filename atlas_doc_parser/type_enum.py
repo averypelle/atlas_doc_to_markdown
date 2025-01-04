@@ -40,6 +40,8 @@ class TypeEnum(enum.Enum):
     tableCell = "tableCell"
     tableHeader = "tableHeader"
     tableRow = "tableRow"
+    taskItem = "taskItem"
+    taskList = "taskList"
     text = "text"
     textColor = "textColor"
     underline = "underline"

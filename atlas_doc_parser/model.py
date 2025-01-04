@@ -7,6 +7,7 @@ import textwrap
 import dataclasses
 from datetime import datetime
 
+from .constants import TAB
 from .arg import REQ, NA, rm_na
 from .type_enum import TypeEnum
 from .base import Base, T_DATA, T_DATA_LIKE
@@ -18,9 +19,9 @@ class BaseMark(Base):
 
     @classmethod
     def from_dict(
-        cls,
+        cls: T.Type["T_MARK"],
         dct: T_DATA,
-    ):
+    ) -> "T_MARK":
         # print(f"{dct = }")  # for debug only
         dct = copy.deepcopy(dct)
         if "attrs" in dct:
@@ -161,10 +162,10 @@ class BaseNode(Base):
 
     @classmethod
     def from_dict(
-        cls,
+        cls: T.Type["T_NODE"],
         dct: T_DATA,
         ignore_error: bool = False,
-    ):
+    ) -> "T_NODE":
         # print(f"{dct = }")  # for debug only
         dct = copy.deepcopy(dct)
 
@@ -179,17 +180,17 @@ class BaseNode(Base):
                 for d in dct["content"]:
                     # print(f"{d = }")  # for debug only
                     # impl 1. use try except
-                    try:
-                        content = parse_node(d)
-                        new_content.append(content)
-                    except Exception as e:
-                        if ignore_error:
-                            pass
-                        else:
-                            raise e
+                    # try:
+                    #     content = parse_node(d)
+                    #     new_content.append(content)
+                    # except Exception as e:
+                    #     if ignore_error:
+                    #         pass
+                    #     else:
+                    #         raise e
                     # impl 2. no try except, for debug only
-                    # content = parse_node(d)
-                    # new_content.append(content)
+                    content = parse_node(d)
+                    new_content.append(content)
 
                 dct["content"] = new_content
 
@@ -238,6 +239,9 @@ def _content_to_markdown(
     content: T.Union[T.List["T_NODE"], NA],
     concat: str = "",
 ) -> str:
+    """
+    Concatenate the markdown of the content.
+    """
     if isinstance(content, NA):
         return ""
     else:
@@ -251,6 +255,28 @@ def _content_to_markdown(
         return concat.join(lst)
 
 
+def _doc_content_to_markdown(
+    content: T.Union[T.List["T_NODE"], NA],
+    concat: str = "\n",
+) -> str:
+    if isinstance(content, NA):
+        return ""
+    else:
+        lst = list()
+        for node in content:
+            # print("----- Work on a new node -----")
+            if isinstance(node, (NodeBulletList, NodeOrderedList, NodeCodeBlock)):
+                md = "\n" + node.to_markdown() + "\n"
+            else:
+                md = node.to_markdown()
+            # print(f"{node = }")
+            # print(f"{md = }")
+            lst.append(md)
+
+    md = _strip_double_empty_line(concat.join(lst))
+    return md
+
+
 @dataclasses.dataclass
 class NodeBlockQuote(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.blockquote.value)
@@ -259,7 +285,7 @@ class NodeBlockQuote(BaseNode):
     def to_markdown(self) -> str:
         return (
             textwrap.indent(
-                _strip_double_empty_line(_content_to_markdown(self.content)),
+                _doc_content_to_markdown(self.content),
                 prefix="> ",
                 predicate=lambda line: True,
             )
@@ -305,10 +331,6 @@ class NodeBulletList(BaseNode):
                     lines.extend(remaining_lines)
 
         return "\n".join(lines)
-        # the text of c.to_markdown() may have new line character (if it is a paragraph)
-        # for bullet list, we need to remove the new line character
-        # lines = [f"- {c.to_markdown().rstrip()}" for c in self.content]
-        # return "\n".join(lines)
 
 
 @dataclasses.dataclass
@@ -358,10 +380,7 @@ class NodeDoc(BaseNode):
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
 
     def to_markdown(self) -> str:
-        # for doc, we need to have a new line at the end and ensure there is no empty line at the beginning
-        md = _content_to_markdown(self.content, concat="\n").strip() + "\n"
-        for _ in range(3):
-            md = md.replace("\n\n\n", "\n\n")
+        md = _doc_content_to_markdown(self.content)
         return md
 
 
@@ -397,7 +416,7 @@ class NodeExpand(BaseNode):
     marks: T.List["T_MARK"] = dataclasses.field(default=NA)
 
     def to_markdown(self) -> str:
-        return _content_to_markdown(self.content)
+        return _doc_content_to_markdown(self.content)
 
 
 @dataclasses.dataclass
@@ -541,12 +560,47 @@ class NodeOrderedList(BaseNode):
     attrs: NodeOrderedListAttrs = dataclasses.field(default_factory=NA)
     content: T.List["T_NODE"] = dataclasses.field(default=REQ)
 
-    def to_markdown(self) -> str:
-        if isinstance(self.attrs.order, int):
-            order = self.attrs.order + 1
+    def to_markdown(
+        self,
+        level: int = 0,
+    ) -> str:
+        lines = []
+        indent = "    " * level  # 4 spaces per level
+
+        # Start numbering from attrs.order (or 1 for inner levels)
+        if level == 0 and isinstance(self.attrs.order, int):
+            current_num = self.attrs.order
         else:
-            raise ValueError
-        return f"{order}. {_content_to_markdown(self.content)}"
+            current_num = 1
+
+        for item in self.content:
+            if isinstance(item, NodeListItem):
+                # Process the list item content
+                content_lines = []
+                for node in item.content:
+                    if isinstance(node, NodeOrderedList):
+                        # Nested list - increase level
+                        content_lines.append(node.to_markdown(level=level + 1))
+                    else:
+                        # Regular content (like paragraph)
+                        content_lines.append(node.to_markdown().rstrip())
+
+                # Join the content lines
+                item_content = "\n".join(content_lines)
+
+                # Format the first line with number
+                first_content = item_content.split("\n")[0]
+                first_line = f"{indent}{current_num}. {first_content}"
+                lines.append(first_line)
+
+                # Add remaining lines
+                remaining_lines = item_content.split("\n")[1:]
+                if remaining_lines:
+                    lines.extend(remaining_lines)
+
+                current_num += 1
+
+        return "\n".join(lines)
 
 
 @dataclasses.dataclass
@@ -568,7 +622,7 @@ class NodePanel(BaseNode):
                         [
                             f"**{self.attrs.panelType.upper()}**",
                             "",
-                            _content_to_markdown(self.content),
+                            _doc_content_to_markdown(self.content),
                         ]
                     )
                 ),
@@ -639,6 +693,75 @@ class NodeTableRow(BaseNode):
 
 
 @dataclasses.dataclass
+class NodeHeadingAttrs(Base):
+    level: int = dataclasses.field(default_factory=REQ)
+    localId: str = dataclasses.field(default_factory=NA)
+
+
+@dataclasses.dataclass
+class NodeTaskItemAttrs(Base):
+    """Attributes for task item node."""
+
+    state: str = dataclasses.field(default_factory=REQ)
+    localId: str = dataclasses.field(default_factory=NA)
+
+
+@dataclasses.dataclass
+class NodeTaskItem(BaseNode):
+    """Task item node representing a single task."""
+
+    type: str = dataclasses.field(default=TypeEnum.taskItem.value)
+    attrs: NodeTaskItemAttrs = dataclasses.field(default_factory=REQ)
+    content: T.List["T_NODE"] = dataclasses.field(default_factory=REQ)
+
+    def to_markdown(self) -> str:
+        # Convert state to checkbox representation
+        checkbox = "[x]" if self.attrs.state == "DONE" else "[ ]"
+        return f"{checkbox} {_content_to_markdown(self.content)}"
+
+
+@dataclasses.dataclass
+class NodeTaskListAttrs(Base):
+    """Attributes for task list node."""
+
+    localId: str = dataclasses.field(default_factory=NA)
+
+
+@dataclasses.dataclass
+class NodeTaskList(BaseNode):
+    """Container for task items."""
+
+    type: str = dataclasses.field(default=TypeEnum.taskList.value)
+    attrs: NodeTaskListAttrs = dataclasses.field(default_factory=NA)
+    content: list[T.Union[NodeTaskItem, "NodeTaskList"]] = dataclasses.field(
+        default_factory=REQ
+    )
+
+    def _to_markdown(
+        self,
+        level: int = 0,
+        lines: T.Optional[T.List[str]] = None,
+    ) -> list[str]:
+        indent = TAB * level
+        if lines is None:
+            lines = []
+        for task_item_or_task_list in self.content:
+            if isinstance(task_item_or_task_list, NodeTaskItem):
+                task_item = task_item_or_task_list
+                lines.append(f"{indent}- {task_item.to_markdown()}")
+            elif isinstance(task_item_or_task_list, NodeTaskList):
+                task_list = task_item_or_task_list
+                task_list._to_markdown(level=level + 1, lines=lines)
+            else:
+                raise TypeError(f"Unexpected type: {type(task_item_or_task_list)}")
+        return lines
+
+    def to_markdown(self) -> str:
+        lines = self._to_markdown()
+        return "\n".join(lines)
+
+
+@dataclasses.dataclass
 class NodeText(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.text.value)
     text: str = dataclasses.field(default_factory=REQ)
@@ -678,6 +801,8 @@ _node_type_to_class_mapping = {
     TypeEnum.tableCell.value: NodeTableCell,
     TypeEnum.tableHeader.value: NodeTableHeader,
     TypeEnum.tableRow.value: NodeTableRow,
+    TypeEnum.taskList.value: NodeTaskList,
+    TypeEnum.taskItem.value: NodeTaskItem,
     TypeEnum.text.value: NodeText,
 }
 
