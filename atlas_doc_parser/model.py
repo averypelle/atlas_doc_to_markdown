@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""
+Data model for Atlassian Document Format (ADF).
+"""
+
 import typing as T
-import enum
 import copy
 import textwrap
 import dataclasses
@@ -297,7 +300,7 @@ class NodeBlockCard(BaseNode):
 
     def to_markdown(self) -> str:
         if isinstance(self.attrs.url, str):
-            return f"[{self.attrs.url}]({self.attrs.url})"
+            return f"\n[{self.attrs.url}]({self.attrs.url})\n"
         else:
             raise NotImplementedError
 
@@ -402,6 +405,12 @@ class NodeDate(BaseNode):
 
 @dataclasses.dataclass
 class NodeDoc(BaseNode):
+    """
+    The root node of the document.
+
+    - https://developer.atlassian.com/cloud/jira/platform/apis/document/nodes/doc/
+    """
+
     version: int = dataclasses.field(default=1)
     type: str = dataclasses.field(default=TypeEnum.doc.value)
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
@@ -505,7 +514,11 @@ class NodeListItem(BaseNode):
         return _content_to_markdown(self.content)
 
 
-T_NODE_MEDIA_ATTRS_TYPE = T.Literal["file", "link", "external"]
+T_NODE_MEDIA_ATTRS_TYPE = T.Literal[
+    "file",
+    "link",
+    "external",
+]
 
 
 @dataclasses.dataclass
@@ -564,9 +577,20 @@ class NodeMediaGroup(BaseNode):
         return ""
 
 
+T_NODE_MEDIA_SINGLE_ATTRS_LAYOUT = T.Literal[
+    "wrap-left",
+    "center",
+    "wrap-right",
+    "wide",
+    "full-width",
+    "align-start",
+    "align-end",
+]
+
+
 @dataclasses.dataclass
 class NodeMediaSingleAttrs(Base):
-    layout: str = dataclasses.field(default_factory=REQ)
+    layout: T_NODE_MEDIA_SINGLE_ATTRS_LAYOUT = dataclasses.field(default_factory=REQ)
     width: float = dataclasses.field(default_factory=NA)
     widthType: str = dataclasses.field(default_factory=NA)
 
@@ -581,12 +605,20 @@ class NodeMediaSingle(BaseNode):
         return _content_to_markdown(self.content)
 
 
+T_NODE_MENTION_ATTRS_USER_TYPE = T.Literal["DEFAULT", "SPECIAL", "APP"]
+T_NODE_MENTION_ATTRS_ACCESS_LEVEL = T.Literal[
+    "NONE", "SITE", "APPLICATION", "CONTAINER"
+]
+
+
 @dataclasses.dataclass
 class NodeMentionAttrs(Base):
     id: str = dataclasses.field(default_factory=REQ)
     text: str = dataclasses.field(default_factory=NA)
-    userType: str = dataclasses.field(default_factory=NA)
-    accessLevel: str = dataclasses.field(default_factory=NA)
+    userType: T_NODE_MENTION_ATTRS_USER_TYPE = dataclasses.field(default_factory=NA)
+    accessLevel: T_NODE_MENTION_ATTRS_ACCESS_LEVEL = dataclasses.field(
+        default_factory=NA
+    )
 
 
 @dataclasses.dataclass
@@ -667,9 +699,12 @@ class NodeOrderedList(BaseNode):
         return "\n".join(lines)
 
 
+T_NODE_PANEL_ATTRS_PANEL_TYPE = T.Literal["info", "note", "warning", "success", "error"]
+
+
 @dataclasses.dataclass
 class NodePanelAttrs(Base):
-    panelType: str = dataclasses.field(default_factory=REQ)
+    panelType: T_NODE_PANEL_ATTRS_PANEL_TYPE = dataclasses.field(default_factory=REQ)
 
 
 @dataclasses.dataclass
@@ -720,10 +755,15 @@ class NodeRule(BaseNode):
         return "---"
 
 
+T_NODE_STATUS_ATTRS_COLOR = T.Literal[
+    "neutral", "purple", "blue", "red", "yellow", "green"
+]
+
+
 @dataclasses.dataclass
 class NodeStatusAttrs(Base):
     text: str = dataclasses.field(default_factory=REQ)
-    color: str = dataclasses.field(default="neutral")
+    color: T_NODE_STATUS_ATTRS_COLOR = dataclasses.field(default="neutral")
     localId: str = dataclasses.field(default_factory=NA)
 
 

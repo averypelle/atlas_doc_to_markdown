@@ -975,6 +975,19 @@ class CaseEnum:
         },
         md="Visit us at [HERE](https://example.com)",
     )
+    status_basic = NodeCase(
+        klass=model.NodeStatus,
+        data={
+            "type": "status",
+            "attrs": {
+                "color": "blue",
+                "style": "bold",
+                "text": "In Progress",
+                "localId": "35d3cbcc-15b9-4e34-9bc2-6fcd0739fb12",
+            },
+        },
+        md="`In Progress`",
+    )
     table_with_complex_nested_content = NodeCase(
         klass=model.NodeTable,
         data={
@@ -1896,39 +1909,23 @@ class CaseEnum:
     )
     text_node_with_italic = NodeCase(
         klass=model.NodeText,
-        data={
-            "type": "text",
-            "text": "Hello world",
-            "marks": [{"type": "em"}]
-        },
+        data={"type": "text", "text": "Hello world", "marks": [{"type": "em"}]},
         md="*Hello world*",
     )
     text_node_with_underline = NodeCase(
         klass=model.NodeText,
-        data={
-            "type": "text",
-            "text": "Hello world",
-            "marks": [{"type": "underline"}]
-        },
+        data={"type": "text", "text": "Hello world", "marks": [{"type": "underline"}]},
         # HTML underline doesn't have standard markdown equivalent
         md="Hello world",
     )
     text_node_with_strikethrough = NodeCase(
         klass=model.NodeText,
-        data={
-            "type": "text",
-            "text": "Hello world",
-            "marks": [{"type": "strike"}]
-        },
+        data={"type": "text", "text": "Hello world", "marks": [{"type": "strike"}]},
         md="~~Hello world~~",
     )
     text_node_with_code_mark = NodeCase(
         klass=model.NodeText,
-        data={
-            "type": "text",
-            "text": "Hello world",
-            "marks": [{"type": "code"}]
-        },
+        data={"type": "text", "text": "Hello world", "marks": [{"type": "code"}]},
         md="`Hello world`",
     )
     text_node_with_subscript = NodeCase(
@@ -1936,7 +1933,7 @@ class CaseEnum:
         data={
             "type": "text",
             "text": "Hello world",
-            "marks": [{"type": "subsup", "attrs": {"type": "sub"}}]
+            "marks": [{"type": "subsup", "attrs": {"type": "sub"}}],
         },
         # Subscript doesn't have standard markdown equivalent
         md="Hello world",
@@ -1946,7 +1943,7 @@ class CaseEnum:
         data={
             "type": "text",
             "text": "superscript",
-            "marks": [{"type": "subsup", "attrs": {"type": "sup"}}]
+            "marks": [{"type": "subsup", "attrs": {"type": "sup"}}],
         },
         # Superscript doesn't have standard markdown equivalent
         md="superscript",
@@ -1956,7 +1953,7 @@ class CaseEnum:
         data={
             "type": "text",
             "text": "Hello world",
-            "marks": [{"type": "textColor", "attrs": {"color": "#97a0af"}}]
+            "marks": [{"type": "textColor", "attrs": {"color": "#97a0af"}}],
         },
         # Text color doesn't have markdown equivalent
         md="Hello world",
@@ -1966,7 +1963,7 @@ class CaseEnum:
         data={
             "type": "text",
             "text": "Hello world",
-            "marks": [{"type": "backgroundColor", "attrs": {"color": "#fedec8"}}]
+            "marks": [{"type": "backgroundColor", "attrs": {"color": "#fedec8"}}],
         },
         # Background color doesn't have markdown equivalent
         md="Hello world",
@@ -1979,12 +1976,9 @@ class CaseEnum:
             "marks": [
                 {
                     "type": "link",
-                    "attrs": {
-                        "href": "http://atlassian.com",
-                        "title": "Atlassian"
-                    }
+                    "attrs": {"href": "http://atlassian.com", "title": "Atlassian"},
                 }
-            ]
+            ],
         },
         md="[Atlassian](http://atlassian.com)",
     )
@@ -1993,12 +1987,7 @@ class CaseEnum:
         data={
             "text": "Atlassian",
             "type": "text",
-            "marks": [
-                {
-                    "type": "link",
-                    "attrs": {"href": "http://atlassian.com"}
-                }
-            ]
+            "marks": [{"type": "link", "attrs": {"href": "http://atlassian.com"}}],
         },
         md="[Atlassian](http://atlassian.com)",
     )

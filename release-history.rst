@@ -15,6 +15,9 @@ x.y.z (Backlog)
 **Miscellaneous**
 
 
-0.1.1 (2024-12-28)
+0.1.1 (2025-01-04)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Features and Improvements**
+
 - First release
+- Add support to export to Markdown

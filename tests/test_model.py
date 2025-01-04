@@ -417,11 +417,11 @@ class TestNodeRule:
         case.test()
 
 
-# class TestNodeStatus:
-#     def test(self):
-#         pass
-#
-#
+class TestNodeStatus:
+    def test_status_basic(self):
+        CaseEnum.status_basic.test()
+
+
 class TestNodeTable:
     def test_table_with_complex_nested_content(self):
         CaseEnum.table_with_complex_nested_content.test()
