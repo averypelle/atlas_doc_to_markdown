@@ -223,7 +223,10 @@ class BaseNode(Base):
         data = dataclasses.asdict(inst)
         return rm_na(**data)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         raise NotImplementedError(
             f"{self.__class__.__name__} has not implemented the ``def to_markdown(self):`` method"
         )
@@ -241,6 +244,7 @@ def _strip_double_empty_line(text: str, n: int = 3) -> str:
 def _content_to_markdown(
     content: T.Union[T.List["T_NODE"], NA],
     concat: str = "",
+    ignore_error: bool = False,
 ) -> str:
     """
     Concatenate the markdown of the content.
@@ -251,10 +255,16 @@ def _content_to_markdown(
         lst = list()
         for node in content:
             # print("----- Work on a new node -----")
-            md = node.to_markdown()
-            # print(f"{node = }")
-            # print(f"{md = }")
-            lst.append(md)
+            try:
+                md = node.to_markdown()
+                # print(f"{node = }")
+                # print(f"{md = }")
+                lst.append(md)
+            except Exception as e:  # pragma: no cover
+                if ignore_error:
+                    pass
+                else:
+                    raise e
         return concat.join(lst)
 
 
@@ -305,7 +315,10 @@ class NodeBlockCard(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.blockCard.value)
     attrs: NodeBlockCardAttrs = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         if isinstance(self.attrs.url, str):
             return f"\n[{self.attrs.url}]({self.attrs.url})\n"
         else:
@@ -317,10 +330,16 @@ class NodeBlockQuote(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.blockquote.value)
     content: list["T_NODE"] = dataclasses.field(default_factory=NA)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         return (
             textwrap.indent(
-                _doc_content_to_markdown(self.content),
+                _doc_content_to_markdown(
+                    content=self.content,
+                    ignore_error=ignore_error,
+                ),
                 prefix="> ",
                 predicate=lambda line: True,
             )
@@ -336,6 +355,7 @@ class NodeBulletList(BaseNode):
     def to_markdown(
         self,
         level: int = 0,
+        ignore_error: bool = False,
     ) -> str:
         lines = []
         indent = "    " * level  # 4 spaces per level
@@ -347,10 +367,24 @@ class NodeBulletList(BaseNode):
                 for node in item.content:
                     if isinstance(node, NodeBulletList):
                         # Nested list - increase level
-                        content_lines.append(node.to_markdown(level=level + 1))
+                        try:
+                            md = node.to_markdown(level=level + 1)
+                            content_lines.append(md)
+                        except Exception as e:
+                            if ignore_error:
+                                pass
+                            else:
+                                raise e
                     else:
                         # Regular content (like paragraph)
-                        content_lines.append(node.to_markdown().rstrip())
+                        try:
+                            md = node.to_markdown().rstrip()
+                            content_lines.append(md)
+                        except Exception as e:
+                            if ignore_error:
+                                pass
+                            else:
+                                raise e
 
                 # Join the content lines
                 item_content = "\n".join(content_lines)
@@ -382,8 +416,14 @@ class NodeCodeBlock(BaseNode):
     attrs: NodeCodeBlockAttrs = dataclasses.field(default_factory=NA)
     content: list["T_NODE"] = dataclasses.field(default_factory=NA)
 
-    def to_markdown(self) -> str:
-        code = _content_to_markdown(self.content)
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
+        code = _content_to_markdown(
+            content=self.content,
+            ignore_error=ignore_error,
+        )
         lang = ""
         if isinstance(self.attrs, NodeCodeBlockAttrs):
             if isinstance(self.attrs.language, str):
@@ -406,7 +446,10 @@ class NodeDate(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.date.value)
     attrs: NodeDateAttrs = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         return str(datetime.utcfromtimestamp(int(self.attrs.timestamp) / 1000).date())
 
 
@@ -422,7 +465,10 @@ class NodeDoc(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.doc.value)
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self, ignore_error: bool = False) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         md = _doc_content_to_markdown(self.content, ignore_error=ignore_error)
         return md
 
@@ -439,7 +485,10 @@ class NodeEmoji(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.emoji.value)
     attrs: NodeEmojiAttrs = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         if isinstance(self.attrs.text, str):
             return self.attrs.text
         else:
@@ -458,13 +507,22 @@ class NodeExpand(BaseNode):
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
     marks: T.List["T_MARK"] = dataclasses.field(default_factory=NA)
 
-    def to_markdown(self) -> str:
-        return _doc_content_to_markdown(self.content)
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
+        return _doc_content_to_markdown(content=self.content, ignore_error=ignore_error)
 
 
 @dataclasses.dataclass
 class NodeHardBreak(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.hardBreak.value)
+
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
+        return "\n"
 
 
 @dataclasses.dataclass
@@ -479,7 +537,10 @@ class NodeHeading(BaseNode):
     attrs: NodeHeadingAttrs = dataclasses.field(default_factory=REQ)
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         """
         For heading, we would like to have an empty line before and after the heading.
         """
@@ -487,7 +548,7 @@ class NodeHeading(BaseNode):
             "\n\n"
             + "{} {}".format(
                 "#" * self.attrs.level,
-                _content_to_markdown(self.content),
+                _content_to_markdown(content=self.content, ignore_error=ignore_error),
             )
             + "\n\n"
         )
@@ -505,7 +566,10 @@ class NodeInlineCard(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.inlineCard.value)
     attrs: NodeInlineCardAttrs = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         if isinstance(self.attrs.url, str):
             return f"[{self.attrs.url}]({self.attrs.url})"
         else:
@@ -517,8 +581,11 @@ class NodeListItem(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.listItem.value)
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
-        return _content_to_markdown(self.content)
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
+        return _content_to_markdown(content=self.content, ignore_error=ignore_error)
 
 
 T_NODE_MEDIA_ATTRS_TYPE = T.Literal[
@@ -555,7 +622,10 @@ class NodeMedia(BaseNode):
     attrs: NodeMediaAttrs = dataclasses.field(default_factory=REQ)
     marks: T.List["T_MARK"] = dataclasses.field(default_factory=NA)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         if isinstance(self.attrs.alt, str):
             alt = self.attrs.alt
         else:
@@ -580,7 +650,10 @@ class NodeMediaGroup(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.mediaGroup.value)
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         return ""
 
 
@@ -608,8 +681,11 @@ class NodeMediaSingle(BaseNode):
     attrs: NodeMediaSingleAttrs = dataclasses.field(default_factory=REQ)
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
-        return _content_to_markdown(self.content)
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
+        return _content_to_markdown(content=self.content, ignore_error=ignore_error)
 
 
 T_NODE_MENTION_ATTRS_USER_TYPE = T.Literal["DEFAULT", "SPECIAL", "APP"]
@@ -633,7 +709,10 @@ class NodeMention(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.mention.value)
     attrs: NodeMentionAttrs = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         if isinstance(self.attrs.text, NA):
             return "@Unknown"
         else:
@@ -651,6 +730,12 @@ class NodeNestedExpand(BaseNode):
     attrs: NodeNestedExpandAttrs = dataclasses.field(default_factory=NA)
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
+        return _doc_content_to_markdown(content=self.content, ignore_error=ignore_error)
+
 
 @dataclasses.dataclass
 class NodeOrderedListAttrs(Base):
@@ -666,6 +751,7 @@ class NodeOrderedList(BaseNode):
     def to_markdown(
         self,
         level: int = 0,
+        ignore_error: bool = False,
     ) -> str:
         lines = []
         indent = "    " * level  # 4 spaces per level
@@ -683,10 +769,24 @@ class NodeOrderedList(BaseNode):
                 for node in item.content:
                     if isinstance(node, NodeOrderedList):
                         # Nested list - increase level
-                        content_lines.append(node.to_markdown(level=level + 1))
+                        try:
+                            md = node.to_markdown(level=level + 1)
+                            content_lines.append(md)
+                        except Exception as e:  # pragma: no cover
+                            if ignore_error:
+                                pass
+                            else:
+                                raise e
                     else:
                         # Regular content (like paragraph)
-                        content_lines.append(node.to_markdown().rstrip())
+                        try:
+                            md = node.to_markdown().rstrip()
+                            content_lines.append(md)
+                        except Exception as e:  # pragma: no cover
+                            if ignore_error:
+                                pass
+                            else:
+                                raise e
 
                 # Join the content lines
                 item_content = "\n".join(content_lines)
@@ -720,7 +820,10 @@ class NodePanel(BaseNode):
     attrs: NodePanelAttrs = dataclasses.field(default_factory=REQ)
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         return (
             textwrap.indent(
                 _strip_double_empty_line(
@@ -728,7 +831,10 @@ class NodePanel(BaseNode):
                         [
                             f"**{self.attrs.panelType.upper()}**",
                             "",
-                            _doc_content_to_markdown(self.content),
+                            _doc_content_to_markdown(
+                                content=self.content,
+                                ignore_error=ignore_error,
+                            ),
                         ]
                     )
                 ),
@@ -750,15 +856,27 @@ class NodeParagraph(BaseNode):
     attrs: NodeParagraphAttrs = dataclasses.field(default_factory=NA)
     content: list["T_NODE"] = dataclasses.field(default_factory=NA)
 
-    def to_markdown(self) -> str:
-        return _content_to_markdown(self.content) + "\n"
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
+        return (
+            _content_to_markdown(
+                content=self.content,
+                ignore_error=ignore_error,
+            )
+            + "\n"
+        )
 
 
 @dataclasses.dataclass
 class NodeRule(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.rule.value)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         return "---"
 
 
@@ -779,7 +897,10 @@ class NodeStatus(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.status.value)
     attrs: NodeStatusAttrs = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         return f"`{self.attrs.text}`"
 
 
@@ -797,12 +918,22 @@ class NodeTable(BaseNode):
     attrs: NodeTableAttrs = dataclasses.field(default_factory=NA)
     content: list["NodeTableRow"] = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         lines = list()
         for row in self.content:
-            lines.append(row.to_markdown())
-            if isinstance(row.content[0], NodeTableHeader):
-                lines.append("| " + " | ".join(["---"] * len(row.content)) + " |")
+            try:
+                md = row.to_markdown()
+                lines.append(md)
+                if isinstance(row.content[0], NodeTableHeader):
+                    lines.append("| " + " | ".join(["---"] * len(row.content)) + " |")
+            except Exception as e:  # pragma: no cover
+                if ignore_error:
+                    pass
+                else:
+                    raise e
         return "\n".join(lines)
 
 
@@ -820,8 +951,11 @@ class NodeTableCell(BaseNode):
     attrs: NodeTableCellAttrs = dataclasses.field(default_factory=NA)
     content: list["T_NODE"] = dataclasses.field(default_factory=NA)
 
-    def to_markdown(self) -> str:
-        md = _content_to_markdown(self.content)
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
+        md = _content_to_markdown(content=self.content, ignore_error=ignore_error)
         md = md.replace("|", "\\|").replace("\n", "<br>")
         return md
 
@@ -840,8 +974,11 @@ class NodeTableHeader(BaseNode):
     attrs: NodeTableHeaderAttrs = dataclasses.field(default_factory=NA)
     content: list["T_NODE"] = dataclasses.field(default_factory=NA)
 
-    def to_markdown(self) -> str:
-        md = _content_to_markdown(self.content)
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
+        md = _content_to_markdown(content=self.content, ignore_error=ignore_error)
         md = md.replace("|", "\\|").replace("\n", "<br>")
         return md
 
@@ -853,17 +990,15 @@ class NodeTableRow(BaseNode):
         default_factory=REQ
     )
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         cells = []
         for cell in self.content:
-            cells.append(cell.to_markdown())
+            md = cell.to_markdown(ignore_error=ignore_error)
+            cells.append(md)
         return "| " + " | ".join(cells) + " |"
-
-
-@dataclasses.dataclass
-class NodeHeadingAttrs(Base):
-    level: int = dataclasses.field(default_factory=REQ)
-    localId: str = dataclasses.field(default_factory=NA)
 
 
 @dataclasses.dataclass
@@ -882,10 +1017,13 @@ class NodeTaskItem(BaseNode):
     attrs: NodeTaskItemAttrs = dataclasses.field(default_factory=REQ)
     content: list["T_NODE"] = dataclasses.field(default_factory=REQ)
 
-    def to_markdown(self) -> str:
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
         # Convert state to checkbox representation
         checkbox = "[x]" if self.attrs.state == "DONE" else "[ ]"
-        return f"{checkbox} {_content_to_markdown(self.content)}"
+        return f"{checkbox} {_content_to_markdown(content=self.content, ignore_error=ignore_error)}"
 
 
 @dataclasses.dataclass
@@ -909,6 +1047,7 @@ class NodeTaskList(BaseNode):
         self,
         level: int = 0,
         lines: T.Optional[T.List[str]] = None,
+        ignore_error: bool = False,
     ) -> list[str]:
         indent = TAB * level
         if lines is None:
@@ -916,16 +1055,22 @@ class NodeTaskList(BaseNode):
         for task_item_or_task_list in self.content:
             if isinstance(task_item_or_task_list, NodeTaskItem):
                 task_item = task_item_or_task_list
-                lines.append(f"{indent}- {task_item.to_markdown()}")
+                md = task_item.to_markdown(ignore_error=ignore_error)
+                lines.append(f"{indent}- {md}")
             elif isinstance(task_item_or_task_list, NodeTaskList):
                 task_list = task_item_or_task_list
-                task_list._to_markdown(level=level + 1, lines=lines)
+                task_list._to_markdown(
+                    level=level + 1, lines=lines, ignore_error=ignore_error
+                )
             else:
                 raise TypeError(f"Unexpected type: {type(task_item_or_task_list)}")
         return lines
 
-    def to_markdown(self) -> str:
-        lines = self._to_markdown()
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ) -> str:
+        lines = self._to_markdown(ignore_error=ignore_error)
         return "\n".join(lines)
 
 
@@ -935,7 +1080,10 @@ class NodeText(BaseNode):
     text: str = dataclasses.field(default_factory=REQ)
     marks: T.List["T_MARK"] = dataclasses.field(default_factory=NA)
 
-    def to_markdown(self):
+    def to_markdown(
+        self,
+        ignore_error: bool = False,
+    ):
         md = self.text
         md = _add_style_to_markdown(md, self)
         return md
