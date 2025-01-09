@@ -138,10 +138,28 @@ class MarkUnderLine(BaseMark):
     type: str = dataclasses.field(default=TypeEnum.underline.value)
 
 
+@dataclasses.dataclass
+class MarkIndentationAttrs(Base):
+    level: int = dataclasses.field(default_factory=REQ)
+
+
+@dataclasses.dataclass
+class MarkIndentation(BaseMark):
+    type: str = dataclasses.field(default=TypeEnum.indentation.value)
+    attrs: MarkIndentationAttrs = dataclasses.field(default_factory=REQ)
+
+    def to_markdown(self, text: str) -> str:
+        return textwrap.indent(
+            text=text,
+            prefix=TAB * self.attrs.level,
+        )
+
+
 _mark_type_to_class_mapping = {
     TypeEnum.backgroundColor.value: MarkBackGroundColor,
     TypeEnum.code.value: MarkCode,
     TypeEnum.em.value: MarkEm,
+    TypeEnum.indentation.value: MarkIndentation,
     TypeEnum.link.value: MarkLink,
     TypeEnum.strike.value: MarkStrike,
     TypeEnum.strong.value: MarkStrong,
@@ -511,7 +529,9 @@ class NodeExpand(BaseNode):
         self,
         ignore_error: bool = False,
     ) -> str:
-        return _doc_content_to_markdown(content=self.content, ignore_error=ignore_error)
+        md = _doc_content_to_markdown(content=self.content, ignore_error=ignore_error)
+        md = _add_style_to_markdown(md, self)
+        return md
 
 
 @dataclasses.dataclass
@@ -855,18 +875,18 @@ class NodeParagraph(BaseNode):
     type: str = dataclasses.field(default=TypeEnum.paragraph.value)
     attrs: NodeParagraphAttrs = dataclasses.field(default_factory=NA)
     content: list["T_NODE"] = dataclasses.field(default_factory=NA)
+    marks: T.List["T_MARK"] = dataclasses.field(default_factory=NA)
 
     def to_markdown(
         self,
         ignore_error: bool = False,
     ) -> str:
-        return (
-            _content_to_markdown(
-                content=self.content,
-                ignore_error=ignore_error,
-            )
-            + "\n"
+        md = _content_to_markdown(
+            content=self.content,
+            ignore_error=ignore_error,
         )
+        md = _add_style_to_markdown(md, self)
+        return md + "\n"
 
 
 @dataclasses.dataclass

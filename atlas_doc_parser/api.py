@@ -8,6 +8,8 @@ from .model import MarkBackGroundColorAttrs
 from .model import MarkBackGroundColor
 from .model import MarkCode
 from .model import MarkEm
+from .model import MarkIndentationAttrs
+from .model import MarkIndentation
 from .model import MarkLinkAttrs
 from .model import MarkLink
 from .model import MarkStrike

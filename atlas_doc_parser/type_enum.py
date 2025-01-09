@@ -21,6 +21,7 @@ class TypeEnum(enum.Enum):
     hardBreak = "hardBreak"
     heading = "heading"
     inlineCard = "inlineCard"
+    indentation = "indentation"
     link = "link"
     listItem = "listItem"
     media = "media"
