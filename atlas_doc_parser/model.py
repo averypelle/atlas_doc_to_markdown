@@ -169,10 +169,13 @@ _mark_type_to_class_mapping = {
 }
 
 
-def parse_mark(dct: T_DATA) -> "T_MARK":
+def parse_mark(dct: T_DATA) -> T.Optional["T_MARK"]:
     # print(f"{dct = }")  # for debug only
     type_ = dct["type"]
-    klass = _mark_type_to_class_mapping[type_]
+    klass = _mark_type_to_class_mapping.get(type_)
+    if klass is None:
+        return None
+
     # print(f"{klass = }")  # for debug only
     return klass.from_dict(dct)
 
@@ -203,6 +206,9 @@ class BaseNode(Base):
                     # --- impl 1. use try except
                     try:
                         content = parse_node(d)
+                        if content is None:
+                            continue
+
                         new_content.append(content)
                     except Exception as e:
                         if ignore_error:
@@ -221,6 +227,9 @@ class BaseNode(Base):
                 for d in dct["marks"]:
                     # print(f"{d = }")  # for debug only
                     mark = parse_mark(d)
+                    if mark is None:
+                        continue
+
                     new_marks.append(mark)
                 dct["marks"] = new_marks
 
@@ -1142,12 +1151,12 @@ _node_type_to_class_mapping = {
 }
 
 
-def parse_node(dct: T_DATA) -> "T_NODE":
+def parse_node(dct: T_DATA) -> T.Optional["T_NODE"]:
     # print(f"{dct = }")  # for debug only
     type_ = dct["type"]
     klass = _node_type_to_class_mapping.get(type_)
     # print(f"{klass = }")  # for debug only
     if klass is None:
-        return NodeText(text="")
+        return None
 
     return klass.from_dict(dct)
