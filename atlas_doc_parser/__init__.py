@@ -6,10 +6,10 @@ Package Description.
 
 from ._version import __version__
 
-__short_description__ = "Package short description."
+__short_description__ = "Convert Atlassian Document Format (ADF) to Markdown"
 __license__ = "MIT"
-__author__ = "Sanhe Hu"
-__author_email__ = "husanhe@gmail.com"
-__maintainer__ = "Sanhe Hu"
-__maintainer_email__ = "husanhe@email.com"
-__github_username__ = "MacHu-GWU"
+__author__ = "Avery Pelle"
+__author_email__ = "avery.pelle@gmail.com"
+__maintainer__ = "Avery Pelle"
+__maintainer_email__ = "avery.pelle@email.com"
+__github_username__ = "averypelle"
