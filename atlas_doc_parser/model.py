@@ -1145,6 +1145,9 @@ _node_type_to_class_mapping = {
 def parse_node(dct: T_DATA) -> "T_NODE":
     # print(f"{dct = }")  # for debug only
     type_ = dct["type"]
-    klass = _node_type_to_class_mapping[type_]
+    klass = _node_type_to_class_mapping.get(type_)
     # print(f"{klass = }")  # for debug only
+    if klass is None:
+        return NodeText(text="")
+
     return klass.from_dict(dct)
