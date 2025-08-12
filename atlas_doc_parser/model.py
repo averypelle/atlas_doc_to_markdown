@@ -348,8 +348,6 @@ class NodeBlockCard(BaseNode):
     ) -> str:
         if isinstance(self.attrs.url, str):
             return f"\n[{self.attrs.url}]({self.attrs.url})\n"
-        else:
-            raise NotImplementedError
 
 
 @dataclasses.dataclass
@@ -518,8 +516,6 @@ class NodeEmoji(BaseNode):
     ) -> str:
         if isinstance(self.attrs.text, str):
             return self.attrs.text
-        else:
-            raise NotImplementedError
 
 
 @dataclasses.dataclass
@@ -601,8 +597,6 @@ class NodeInlineCard(BaseNode):
     ) -> str:
         if isinstance(self.attrs.url, str):
             return f"[{self.attrs.url}]({self.attrs.url})"
-        else:
-            raise NotImplementedError
 
 
 @dataclasses.dataclass
@@ -660,18 +654,10 @@ class NodeMedia(BaseNode):
         else:
             alt = ""
 
-        if self.attrs.is_file_type():
-            raise NotImplementedError
-        elif self.attrs.is_link_type():
-            raise NotImplementedError
-        elif self.attrs.is_external_type():
+        if self.attrs.is_external_type():
             if isinstance(self.attrs.url, str):
                 md = f"![{alt}]({self.attrs.url})"
                 return _add_style_to_markdown(md, self)
-            else:
-                raise NotImplementedError
-        else:  # pragma: no cover
-            raise TypeError
 
 
 @dataclasses.dataclass
@@ -1091,8 +1077,6 @@ class NodeTaskList(BaseNode):
                 task_list._to_markdown(
                     level=level + 1, lines=lines, ignore_error=ignore_error
                 )
-            else:
-                raise TypeError(f"Unexpected type: {type(task_item_or_task_list)}")
         return lines
 
     def to_markdown(
