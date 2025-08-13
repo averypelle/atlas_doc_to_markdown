@@ -205,7 +205,7 @@ class BaseNode(Base):
                     # print(f"{d = }")  # for debug only
                     # --- impl 1. use try except
                     try:
-                        content = parse_node(d)
+                        content = parse_node(d, ignore_error=ignore_error)
                         if content is None:
                             continue
 
@@ -1151,7 +1151,7 @@ _node_type_to_class_mapping = {
 }
 
 
-def parse_node(dct: T_DATA) -> T.Optional["T_NODE"]:
+def parse_node(dct: T_DATA, ignore_error: bool = False) -> T.Optional["T_NODE"]:
     # print(f"{dct = }")  # for debug only
     type_ = dct["type"]
     klass = _node_type_to_class_mapping.get(type_)
@@ -1159,4 +1159,4 @@ def parse_node(dct: T_DATA) -> T.Optional["T_NODE"]:
     if klass is None:
         return None
 
-    return klass.from_dict(dct)
+    return klass.from_dict(dct, ignore_error=ignore_error)
