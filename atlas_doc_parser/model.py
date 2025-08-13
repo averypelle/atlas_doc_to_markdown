@@ -205,7 +205,7 @@ class BaseNode(Base):
                     # print(f"{d = }")  # for debug only
                     # --- impl 1. use try except
                     try:
-                        content = parse_node(d, ignore_error=ignore_error)
+                        content = parse_node(d)
                         if content is None:
                             continue
 
@@ -283,7 +283,7 @@ def _content_to_markdown(
         for node in content:
             # print("----- Work on a new node -----")
             try:
-                md = node.to_markdown(ignore_error=ignore_error)
+                md = node.to_markdown()
                 # print(f"{node = }")
                 # print(f"{md = }")
                 lst.append(md)
@@ -310,7 +310,7 @@ def _doc_content_to_markdown(
                 if isinstance(node, (NodeBulletList, NodeOrderedList, NodeCodeBlock)):
                     md = "\n" + node.to_markdown() + "\n"
                 else:
-                    md = node.to_markdown(ignore_error=ignore_error)
+                    md = node.to_markdown()
                 # print(f"{node = }")
                 # print(f"{md = }")
                 lst.append(md)
@@ -324,10 +324,10 @@ def _doc_content_to_markdown(
     return md
 
 
-def _add_style_to_markdown(md: str, node: "T_NODE", ignore_error: bool = False) -> str:
+def _add_style_to_markdown(md: str, node: "T_NODE") -> str:
     if isinstance(node.marks, list):
         for mark in node.marks:
-            md = mark.to_markdown(md, ignore_error=ignore_error)
+            md = mark.to_markdown(md)
     return md
 
 
@@ -539,7 +539,7 @@ class NodeExpand(BaseNode):
         ignore_error: bool = False,
     ) -> str:
         md = _doc_content_to_markdown(content=self.content, ignore_error=ignore_error)
-        md = _add_style_to_markdown(md, self, ignore_error=ignore_error)
+        md = _add_style_to_markdown(md, self)
         return md
 
 
@@ -954,7 +954,7 @@ class NodeTable(BaseNode):
         lines = list()
         for row in self.content:
             try:
-                md = row.to_markdown(ignore_error=ignore_error)
+                md = row.to_markdown()
                 lines.append(md)
                 if isinstance(row.content[0], NodeTableHeader):
                     lines.append("| " + " | ".join(["---"] * len(row.content)) + " |")
@@ -1089,9 +1089,7 @@ class NodeTaskList(BaseNode):
             elif isinstance(task_item_or_task_list, NodeTaskList):
                 task_list = task_item_or_task_list
                 task_list._to_markdown(
-                    level=level + 1,
-                    lines=lines,
-                    ignore_error=ignore_error,
+                    level=level + 1, lines=lines, ignore_error=ignore_error
                 )
             else:
                 raise TypeError(f"Unexpected type: {type(task_item_or_task_list)}")
@@ -1116,7 +1114,7 @@ class NodeText(BaseNode):
         ignore_error: bool = False,
     ):
         md = self.text
-        md = _add_style_to_markdown(md, self, ignore_error=ignore_error)
+        md = _add_style_to_markdown(md, self)
         return md
 
 
@@ -1153,7 +1151,7 @@ _node_type_to_class_mapping = {
 }
 
 
-def parse_node(dct: T_DATA, ignore_error: bool = False) -> T.Optional["T_NODE"]:
+def parse_node(dct: T_DATA) -> T.Optional["T_NODE"]:
     # print(f"{dct = }")  # for debug only
     type_ = dct["type"]
     klass = _node_type_to_class_mapping.get(type_)
@@ -1161,4 +1159,4 @@ def parse_node(dct: T_DATA, ignore_error: bool = False) -> T.Optional["T_NODE"]:
     if klass is None:
         return None
 
-    return klass.from_dict(dct, ignore_error=ignore_error)
+    return klass.from_dict(dct)
